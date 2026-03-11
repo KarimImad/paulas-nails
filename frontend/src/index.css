@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-cream-50 text-cream-900 font-sans antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-cream-700 text-cream-50 font-sans font-medium text-sm tracking-wide rounded-full transition-all duration-200 hover:bg-cream-800 hover:shadow-hover active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-transparent text-cream-700 font-sans font-medium text-sm tracking-wide rounded-full border border-cream-300 transition-all duration-200 hover:bg-cream-100 hover:border-cream-400 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-transparent text-cream-600 font-sans font-medium text-sm transition-all duration-200 hover:text-cream-800 active:scale-95;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 font-sans font-medium text-sm rounded-full border border-red-200 transition-all duration-200 hover:bg-red-100 active:scale-95;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-cream-200 rounded-xl text-cream-900 placeholder-cream-400 text-sm font-sans transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-cream-300 focus:border-cream-400;
+  }
+
+  .label {
+    @apply block text-xs font-medium font-sans text-cream-600 uppercase tracking-wider mb-1.5;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-soft border border-cream-100;
+  }
+
+  .badge-pending {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200;
+  }
+
+  .badge-confirmed {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200;
+  }
+
+  .badge-cancelled {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-cream-100 text-cream-500 border border-cream-200;
+  }
+
+  .page-header {
+    @apply text-4xl md:text-5xl font-serif font-light text-cream-900 tracking-wide;
+  }
+
+  .section-title {
+    @apply text-2xl md:text-3xl font-serif font-light text-cream-800;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #F9F2E8; }
+::-webkit-scrollbar-thumb { background: #D9BA90; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #C4A070; }
