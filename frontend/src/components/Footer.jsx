@@ -41,9 +41,9 @@ export default function Footer() {
           <div>
             <h4 className="text-xs font-sans font-medium uppercase tracking-widest text-cream-500 mb-4">Contact</h4>
             <ul className="space-y-2 text-sm text-cream-400">
-              <li>12 rue des Acacias, Paris 75017</li>
-              <li>contact@paulasnails.fr</li>
-              <li>+33 1 23 45 67 89</li>
+              <li>12 rue Vital Carles, Bordeaux 33000</li>
+              <li>paulalafon@hotmail.fr</li>
+              <li>+33 6 15 73 00 76</li>
               <li className="pt-2 text-cream-500">Lun–Sam · 9h – 19h</li>
             </ul>
           </div>

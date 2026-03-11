@@ -212,7 +212,7 @@ export default function Home() {
                   {step.n}
                 </div>
                 {i < steps.length - 1 && (
-                  <div className="hidden md:block absolute mt-6 ml-full w-full border-t border-cream-800" />
+                  <div className="hidden md:block absolute mt-6 ml-full w-full border-cream-800" />
                 )}
                 <h3 className="text-lg font-serif font-light text-cream-200 mb-3">{step.title}</h3>
                 <p className="text-sm font-sans text-cream-500 leading-relaxed">{step.desc}</p>
