@@ -124,7 +124,7 @@ export default function AdminLayout() {
   );
 
   return (
-    <div className="flex h-screen bg-cream-50 overflow-hidden">
+    <div className="flex h-screen min-h-screen bg-cream-50 overflow-hidden">
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-60 bg-cream-900 shrink-0">
         <SidebarContent />
@@ -154,6 +154,12 @@ export default function AdminLayout() {
           </button>
           <div className="hidden lg:block" />
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleLogout}
+              className="lg:hidden btn-secondary text-xs py-1.5 px-3"
+            >
+              Déconnexion
+            </button>
             <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
             <span className="text-xs font-sans text-cream-400">Interface admin</span>
           </div>

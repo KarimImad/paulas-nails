@@ -8,11 +8,15 @@
   }
 
   body {
-    @apply bg-cream-50 text-cream-900 font-sans antialiased;
+    @apply bg-cream-50 text-cream-900 font-sans antialiased overflow-x-hidden;
   }
 
   h1, h2, h3, h4 {
     @apply font-serif;
+  }
+
+  html, body, #root {
+    height: 100%;
   }
 }
 
@@ -71,3 +75,8 @@
 ::-webkit-scrollbar-track { background: #F9F2E8; }
 ::-webkit-scrollbar-thumb { background: #D9BA90; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #C4A070; }
+
+@supports (height: 100dvh) {
+  .min-h-screen { min-height: 100dvh; }
+  .h-screen { height: 100dvh; }
+}

@@ -68,9 +68,9 @@ export default function MyReservations() {
       <div className="max-w-3xl mx-auto">
         <div className="mb-10">
           <p className="text-xs font-sans font-medium uppercase tracking-widest text-cream-400 mb-2">Mon espace</p>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <h1 className="page-header">Mes rendez-vous</h1>
-            <Link to="/reservation" className="btn-primary text-sm py-2.5">
+            <Link to="/reservation" className="btn-primary text-sm py-2.5 w-full sm:w-auto justify-center">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>

@@ -8,7 +8,7 @@ const pool = new Pool({
   port:     parseInt(process.env.DB_PORT || '5432'),
   database: process.env.DB_NAME     || 'paulas_nails',
   user:     process.env.DB_USER     || 'postgres',
-  password: process.env.DB_PASSWORD || 'Maskali253',
+  password: process.env.DB_PASSWORD,
 });
 
 export async function initDB() {

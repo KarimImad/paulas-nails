@@ -75,7 +75,7 @@ export default function AdminReservations() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {[
           { label: 'En attente', count: counts.pending, cls: 'badge-pending' },
           { label: 'Confirmées', count: counts.confirmed, cls: 'badge-confirmed' },

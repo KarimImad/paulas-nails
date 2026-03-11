@@ -90,6 +90,19 @@ export default function Navbar() {
           )}
         </div>
 
+        {/* Mobile quick action */}
+        <div className="md:hidden flex items-center gap-2">
+          {user ? (
+            <button onClick={handleLogout} className="btn-secondary text-xs py-1.5 px-3">
+              Déconnexion
+            </button>
+          ) : (
+            <Link to="/connexion" className="btn-ghost text-xs px-3 py-1.5">
+              Connexion
+            </Link>
+          )}
+        </div>
+
         {/* Mobile toggle */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}

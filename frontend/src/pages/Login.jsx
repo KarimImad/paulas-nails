@@ -126,10 +126,6 @@ export default function Login() {
           </form>
         </div>
 
-        {/* Admin hint */}
-        <p className="text-center text-xs text-cream-400 font-sans mt-6">
-          Accès admin : admin@paulasnails.fr · Admin2024!
-        </p>
       </div>
     </div>
   );

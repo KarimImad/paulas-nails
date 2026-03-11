@@ -106,7 +106,7 @@ export default function TestPlan() {
       </div>
 
       {/* Résumé */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="card p-4 text-center">
           <p className="text-3xl font-serif font-light text-emerald-600">{okCount}</p>
           <p className="text-xs font-sans text-cream-500 mt-1">Tests OK</p>
@@ -128,35 +128,37 @@ export default function TestPlan() {
             <div className="px-5 py-3 bg-cream-50 border-b border-cream-100">
               <h2 className="text-sm font-sans font-semibold text-cream-800 uppercase tracking-wide">{cat.category}</h2>
             </div>
-            <table className="w-full text-sm font-sans">
-              <thead>
-                <tr className="border-b border-cream-100 text-xs text-cream-400 uppercase tracking-wide">
-                  <th className="text-left px-5 py-3 w-16">ID</th>
-                  <th className="text-left px-5 py-3">Cas de test</th>
-                  <th className="text-left px-5 py-3 hidden md:table-cell">Résultat attendu</th>
-                  <th className="text-center px-5 py-3 w-28">Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cat.tests.map((t, i) => (
-                  <tr key={t.id} className={`border-b border-cream-50 ${i % 2 === 0 ? '' : 'bg-cream-50/40'}`}>
-                    <td className="px-5 py-3 text-cream-400 font-mono text-xs">{t.id}</td>
-                    <td className="px-5 py-3 text-cream-700">{t.description}</td>
-                    <td className="px-5 py-3 text-cream-500 hidden md:table-cell">{t.expected}</td>
-                    <td className="px-5 py-3 text-center">
-                      <button
-                        onClick={() => toggle(t.id)}
-                        className={`text-xs font-medium px-2.5 py-1 rounded-full border cursor-pointer transition-all hover:opacity-80 ${STATUS[statuses[t.id]].className}`}
-                        title="Cliquer pour changer le statut"
-                        aria-label={`Statut du test ${t.id} : ${STATUS[statuses[t.id]].label}. Cliquer pour changer.`}
-                      >
-                        {STATUS[statuses[t.id]].label}
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-sm font-sans">
+                <thead>
+                  <tr className="border-b border-cream-100 text-xs text-cream-400 uppercase tracking-wide">
+                    <th className="text-left px-5 py-3 w-16">ID</th>
+                    <th className="text-left px-5 py-3">Cas de test</th>
+                    <th className="text-left px-5 py-3 hidden md:table-cell">Résultat attendu</th>
+                    <th className="text-center px-5 py-3 w-28">Statut</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {cat.tests.map((t, i) => (
+                    <tr key={t.id} className={`border-b border-cream-50 ${i % 2 === 0 ? '' : 'bg-cream-50/40'}`}>
+                      <td className="px-5 py-3 text-cream-400 font-mono text-xs">{t.id}</td>
+                      <td className="px-5 py-3 text-cream-700">{t.description}</td>
+                      <td className="px-5 py-3 text-cream-500 hidden md:table-cell">{t.expected}</td>
+                      <td className="px-5 py-3 text-center">
+                        <button
+                          onClick={() => toggle(t.id)}
+                          className={`text-xs font-medium px-2.5 py-1 rounded-full border cursor-pointer transition-all hover:opacity-80 ${STATUS[statuses[t.id]].className}`}
+                          title="Cliquer pour changer le statut"
+                          aria-label={`Statut du test ${t.id} : ${STATUS[statuses[t.id]].label}. Cliquer pour changer.`}
+                        >
+                          {STATUS[statuses[t.id]].label}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ))}
       </div>
