@@ -43,7 +43,7 @@ export default function AdminReservations() {
     }
   };
 
-  useEffect(fetchReservations, []);
+  useEffect(() => { fetchReservations(); }, []);
 
   const handleStatusChange = async (id, status) => {
     setUpdating(id);

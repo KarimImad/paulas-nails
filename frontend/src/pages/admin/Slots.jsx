@@ -49,7 +49,7 @@ export default function AdminSlots() {
     }
   };
 
-  useEffect(fetchSlots, []);
+  useEffect(() => { fetchSlots(); }, []);
 
   const toggleTime = (t) => {
     setSelectedTimes(prev =>

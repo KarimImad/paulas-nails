@@ -39,7 +39,7 @@ export default function MyReservations() {
     }
   };
 
-  useEffect(fetchReservations, []);
+  useEffect(() => { fetchReservations(); }, []);
 
   const handleCancel = async (id) => {
     if (!window.confirm('Annuler ce rendez-vous ?')) return;

@@ -1,16 +1,29 @@
 import express from 'express';
 import passport from 'passport';
 import bcrypt from 'bcrypt';
+import { z } from 'zod';
 import pool from '../db/database.js';
 
 const router = express.Router();
 
+const PHONE_RE = /^[+\d\s\-().]{6,20}$/;
+
+const registerSchema = z.object({
+  name:     z.string().min(2).max(100),
+  email:    z.string().email(),
+  password: z.string().min(8).max(128),
+  phone:    z.string().check(z.regex(PHONE_RE)).optional().or(z.literal('')),
+});
+
+const phoneSchema = z.string().check(z.regex(PHONE_RE, 'Format de numéro invalide.'));
+
 router.post('/register', async (req, res) => {
-  const { name, email, password, phone } = req.body;
-  if (!name || !email || !password)
-    return res.status(400).json({ message: 'Tous les champs obligatoires doivent être remplis.' });
-  if (password.length < 6)
-    return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 6 caractères.' });
+  const parsed = registerSchema.safeParse(req.body);
+  if (!parsed.success) {
+    const message = parsed.error.issues[0]?.message || 'Données invalides.';
+    return res.status(400).json({ message });
+  }
+  const { name, email, password, phone } = parsed.data;
 
   try {
     const existing = await pool.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase()]);
@@ -34,7 +47,6 @@ router.post('/register', async (req, res) => {
       res.status(201).json({ user });
     });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
@@ -69,17 +81,20 @@ router.get('/google/callback',
   (req, res) => {
     if (req.user.role === 'admin') return res.redirect(`${process.env.FRONTEND_URL}/admin`);
     if (!req.user.phone) return res.redirect(`${process.env.FRONTEND_URL}/completer-profil`);
-    res.redirect(`${process.env.FRONTEND_URL}/`);
+    res.redirect(`${process.env.FRONTEND_URL}/bienvenue`);
   }
 );
 
 router.patch('/profile', async (req, res) => {
   if (!req.isAuthenticated()) return res.status(401).json({ message: 'Non authentifié.' });
-  const { phone } = req.body;
+
+  const parsed = phoneSchema.safeParse(req.body.phone);
+  if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0].message });
+
   try {
     const result = await pool.query(
       'UPDATE users SET phone = $1 WHERE id = $2 RETURNING id, name, email, role, phone',
-      [phone || null, req.user.id]
+      [parsed.data, req.user.id]
     );
     req.user.phone = result.rows[0].phone;
     res.json({ user: result.rows[0] });

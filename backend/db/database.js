@@ -60,7 +60,8 @@ export async function initDB() {
   // Seed admin
   const adminRes = await pool.query('SELECT id FROM users WHERE email = $1', ['admin@paulasnails.fr']);
   if (adminRes.rows.length === 0) {
-    const hash = await bcrypt.hash('Admin2024!', 10);
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin2024!';
+    const hash = await bcrypt.hash(adminPassword, 12);
     await pool.query(
       'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4)',
       ['Admin', 'admin@paulasnails.fr', hash, 'admin']

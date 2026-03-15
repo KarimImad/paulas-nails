@@ -6,7 +6,9 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
-import memoryStoreFactory from 'memorystore';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import connectPgSimple from 'connect-pg-simple';
 
 import pool, { initDB } from './db/database.js';
 import authRouter from './routes/auth.js';
@@ -14,11 +16,16 @@ import servicesRouter from './routes/services.js';
 import slotsRouter from './routes/slots.js';
 import reservationsRouter from './routes/reservations.js';
 
-const MemoryStore = memoryStoreFactory(session);
-const app = express();
-const PORT = process.env.PORT || 5000;
+if (!process.env.SESSION_SECRET) throw new Error('SESSION_SECRET must be set');
+if (process.env.NODE_ENV === 'production' && !process.env.FRONTEND_URL) {
+  throw new Error('FRONTEND_URL must be set in production');
+}
 
-// ─── Middleware ────────────────────────────────────────────────────────────────
+const PgSession = connectPgSimple(session);
+const app = express();
+const PORT = process.env.PORT || 5001;
+
+app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
@@ -26,20 +33,27 @@ app.use(cors({
   credentials: true,
 }));
 
-// ─── Session ──────────────────────────────────────────────────────────────────
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Trop de tentatives, réessayez dans 15 minutes.' },
+});
+
 app.use(session({
-  store: new MemoryStore({ checkPeriod: 86400000 }),
-  secret: process.env.SESSION_SECRET || 'nail_salon_secret',
+  store: new PgSession({ pool, tableName: 'session', createTableIfMissing: true }),
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    sameSite: 'strict',
+    maxAge: 24 * 60 * 60 * 1000,
   },
 }));
 
-// ─── Passport ─────────────────────────────────────────────────────────────────
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -49,7 +63,7 @@ passport.use(new LocalStrategy(
     try {
       const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email.toLowerCase()]);
       const user = rows[0];
-      if (!user) return done(null, false, { message: 'Email ou mot de passe incorrect.' });
+      if (!user || !user.password) return done(null, false, { message: 'Email ou mot de passe incorrect.' });
       const valid = await bcrypt.compare(password, user.password);
       if (!valid) return done(null, false, { message: 'Email ou mot de passe incorrect.' });
       const { password: _, ...safe } = user;
@@ -107,18 +121,26 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+
 app.use('/api/auth', authRouter);
 app.use('/api/services', servicesRouter);
 app.use('/api/slots', slotsRouter);
 app.use('/api/reservations', reservationsRouter);
 
-// ─── Start ────────────────────────────────────────────────────────────────────
-initDB().then(() => {
+app.use((err, _req, res, _next) => {
+  const status = err.status || 500;
+  const message = process.env.NODE_ENV === 'production' ? 'Erreur serveur.' : err.message;
+  res.status(status).json({ message });
+});
+
+try {
+  await initDB();
   app.listen(PORT, () => {
     console.log(`\n  ✦ Paula's Nails API — http://localhost:${PORT}\n`);
   });
-}).catch(err => {
-  console.error('Erreur de connexion à la base de données :', err.message);
+} catch (err) {
+  console.error('Erreur de démarrage :', err.message);
   process.exit(1);
-});
+}

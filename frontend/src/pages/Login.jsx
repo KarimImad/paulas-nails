@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
@@ -7,9 +7,6 @@ export default function Login() {
   const { login } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from || '/';
-
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -27,7 +24,7 @@ export default function Login() {
     try {
       const user = await login(form.email, form.password);
       addToast(`Bienvenue, ${user.name.split(' ')[0]} !`, 'success');
-      navigate(user.role === 'admin' ? '/admin' : from, { replace: true });
+      navigate(user.role === 'admin' ? '/admin' : '/bienvenue', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Identifiants incorrects.');
     } finally {
@@ -130,7 +127,7 @@ export default function Login() {
           </div>
 
           <a
-            href="http://localhost:5001/api/auth/google"
+            href={`${import.meta.env.VITE_API_URL}/api/auth/google`}
             className="flex items-center justify-center gap-3 w-full py-3 px-4 border border-cream-200 rounded-xl bg-white hover:bg-cream-50 transition-colors text-sm font-sans font-medium text-cream-700"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">

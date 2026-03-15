@@ -19,7 +19,7 @@ export default function CompleteProfile() {
       const res = await axios.patch('/api/auth/profile', { phone });
       setUser(res.data.user);
       addToast('Profil complété !', 'success');
-      navigate('/reservation');
+      navigate('/bienvenue');
     } catch {
       addToast('Erreur lors de la mise à jour.', 'error');
     } finally {

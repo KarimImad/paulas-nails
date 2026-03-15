@@ -111,7 +111,7 @@ export default function AdminServices() {
     }
   };
 
-  useEffect(fetchServices, []);
+  useEffect(() => { fetchServices(); }, []);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer cette prestation ?')) return;

@@ -14,6 +14,7 @@ import Reservation from './pages/Reservation';
 import MyReservations from './pages/MyReservations';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import CompleteProfile from './pages/CompleteProfile';
+import Welcome from './pages/Welcome';
 
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/Dashboard';
@@ -77,6 +78,9 @@ function AppContent() {
             <Route path="tests" element={<TestPlan />} />
             <Route path="reservations" element={<AdminReservations />} />
           </Route>
+          <Route path="/bienvenue" element={
+            <ProtectedRoute><Welcome /></ProtectedRoute>
+          } />
           <Route path="/completer-profil" element={
             <ProtectedRoute requirePhone={false}><CompleteProfile /></ProtectedRoute>
           } />
