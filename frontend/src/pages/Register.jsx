@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 export default function Register() {
-  const { register } = useAuth();
+  const { register, user, loading: authLoading } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -13,6 +13,12 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPwd, setShowPwd] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate('/bienvenue', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   const handleChange = e => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -37,7 +43,6 @@ export default function Register() {
     try {
       await register({ name: form.name, email: form.email, phone: form.phone, password: form.password });
       addToast('Compte créé avec succès !', 'success');
-      navigate('/bienvenue');
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de la création du compte.');
     } finally {
@@ -122,7 +127,7 @@ export default function Register() {
             </div>
 
             <div>
-              <label htmlFor="phone" className="label">Téléphone <span className="text-cream-300 normal-case tracking-normal">(optionnel)</span></label>
+              <label htmlFor="phone" className="label">Téléphone</label>
               <input
                 id="phone"
                 type="tel"
@@ -131,6 +136,8 @@ export default function Register() {
                 onChange={handleChange}
                 placeholder="+33 6 12 34 56 78"
                 className="input-field"
+                required
+                aria-required="true"
                 autoComplete="tel"
               />
             </div>

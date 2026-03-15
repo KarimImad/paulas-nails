@@ -13,6 +13,16 @@ const pool = new Pool({
 
 export async function initDB() {
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS session (
+      sid    VARCHAR     NOT NULL COLLATE "default",
+      sess   JSON        NOT NULL,
+      expire TIMESTAMP(6) NOT NULL,
+      CONSTRAINT session_pkey PRIMARY KEY (sid) NOT DEFERRABLE INITIALLY IMMEDIATE
+    );
+    CREATE INDEX IF NOT EXISTS IDX_session_expire ON session (expire);
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id         SERIAL PRIMARY KEY,
       name       TEXT NOT NULL,

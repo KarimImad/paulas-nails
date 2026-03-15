@@ -196,6 +196,64 @@ paulas-nails/
 
 ---
 
+## Modèle de données (MCD/MLD)
+
+```
+┌─────────────────────┐         ┌─────────────────────┐
+│        users        │         │      services        │
+├─────────────────────┤         ├─────────────────────┤
+│ PK id               │         │ PK id               │
+│    name             │         │    name             │
+│    email (UNIQUE)   │         │    description      │
+│    password         │         │    duration (min)   │
+│    role             │         │    price            │
+│    phone            │         │    category         │
+│    google_id        │         │    created_at       │
+│    created_at       │         └──────────┬──────────┘
+└──────────┬──────────┘                    │
+           │ 1                             │ 1
+           │                              │
+           │           ┌──────────────────┴──────────────────┐
+           │           │           reservations               │
+           └──────────►│ PK id                                │
+              N        │ FK user_id    → users(id)            │
+                       │ FK service_id → services(id)         │
+                       │ FK slot_id   → slots(id)             │
+                       │    status (pending/confirmed/        │
+                       │            cancelled)                │
+                       │    notes                             │
+                       │    created_at                        │
+                       └──────────────────┬───────────────────┘
+                                          │ N
+                                          │
+                              ┌───────────┴──────────┐
+                              │        slots          │
+                              ├──────────────────────┤
+                              │ PK id                │
+                              │    date (YYYY-MM-DD) │
+                              │    time (HH:MM)      │
+                              │    is_available      │
+                              │    created_at        │
+                              │ UNIQUE(date, time)   │
+                              └──────────────────────┘
+
+┌─────────────────────────────────────────┐
+│               session                   │
+├─────────────────────────────────────────┤
+│ PK sid                                  │
+│    sess (JSON)                          │
+│    expire                               │
+│ INDEX(expire)                           │
+└─────────────────────────────────────────┘
+```
+
+**Cardinalités :**
+- 1 `user` → N `reservations`
+- 1 `service` → N `reservations`
+- 1 `slot` → 1 `reservation` active (contrainte applicative + `is_available`)
+
+---
+
 ## Conformité RGPD
 
 - Consentement explicite obligatoire à l'inscription

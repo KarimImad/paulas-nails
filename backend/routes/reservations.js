@@ -42,37 +42,49 @@ router.get('/', isAdmin, async (_req, res) => {
 });
 
 router.post('/', isAuthenticated, async (req, res) => {
+  const client = await pool.connect();
   try {
     const { service_id, slot_id, notes } = req.body;
     if (!service_id || !slot_id)
       return res.status(400).json({ message: 'Service et créneau sont requis.' });
 
-    const slotRes = await pool.query(
-      'SELECT * FROM slots WHERE id = $1 AND is_available = TRUE', [slot_id]
+    await client.query('BEGIN');
+
+    const slotRes = await client.query(
+      'SELECT * FROM slots WHERE id = $1 AND is_available = TRUE FOR UPDATE', [slot_id]
     );
     const slot = slotRes.rows[0];
-    if (!slot) return res.status(400).json({ message: "Ce créneau n'est plus disponible." });
+    if (!slot) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ message: "Ce créneau n'est plus disponible." });
+    }
 
-    const conflict = await pool.query(
+    const conflict = await client.query(
       "SELECT id FROM reservations WHERE slot_id = $1 AND status != 'cancelled'", [slot_id]
     );
-    if (conflict.rows.length > 0)
+    if (conflict.rows.length > 0) {
+      await client.query('ROLLBACK');
       return res.status(400).json({ message: "Ce créneau vient d'être réservé." });
+    }
 
-    const userConflict = await pool.query(`
+    const userConflict = await client.query(`
       SELECT r.id FROM reservations r
       JOIN slots sl ON r.slot_id = sl.id
       WHERE r.user_id = $1 AND sl.date = $2 AND sl.time = $3 AND r.status != 'cancelled'
     `, [req.user.id, slot.date, slot.time]);
-    if (userConflict.rows.length > 0)
+    if (userConflict.rows.length > 0) {
+      await client.query('ROLLBACK');
       return res.status(400).json({ message: 'Vous avez déjà une réservation à ce créneau.' });
+    }
 
-    const insertRes = await pool.query(
+    const insertRes = await client.query(
       'INSERT INTO reservations (user_id, service_id, slot_id, notes) VALUES ($1, $2, $3, $4) RETURNING id',
       [req.user.id, service_id, slot_id, notes || null]
     );
 
-    await pool.query('UPDATE slots SET is_available = FALSE WHERE id = $1', [slot_id]);
+    await client.query('UPDATE slots SET is_available = FALSE WHERE id = $1', [slot_id]);
+
+    await client.query('COMMIT');
 
     const { rows } = await pool.query(`
       SELECT r.*, s.name AS service_name, s.price AS service_price,
@@ -85,52 +97,77 @@ router.post('/', isAuthenticated, async (req, res) => {
 
     res.status(201).json(rows[0]);
   } catch (err) {
+    await client.query('ROLLBACK');
     res.status(500).json({ message: 'Erreur serveur.' });
+  } finally {
+    client.release();
   }
 });
 
 router.patch('/:id/status', isAdmin, async (req, res) => {
+  const client = await pool.connect();
   try {
     const { status } = req.body;
     const { id } = req.params;
     if (!['pending', 'confirmed', 'cancelled'].includes(status))
       return res.status(400).json({ message: 'Statut invalide.' });
 
-    const { rows } = await pool.query('SELECT * FROM reservations WHERE id = $1', [id]);
-    const reservation = rows[0];
-    if (!reservation) return res.status(404).json({ message: 'Réservation introuvable.' });
+    await client.query('BEGIN');
 
-    await pool.query('UPDATE reservations SET status = $1 WHERE id = $2', [status, id]);
+    const { rows } = await client.query('SELECT * FROM reservations WHERE id = $1 FOR UPDATE', [id]);
+    const reservation = rows[0];
+    if (!reservation) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ message: 'Réservation introuvable.' });
+    }
+
+    await client.query('UPDATE reservations SET status = $1 WHERE id = $2', [status, id]);
 
     if (status === 'cancelled' && reservation.status !== 'cancelled')
-      await pool.query('UPDATE slots SET is_available = TRUE WHERE id = $1', [reservation.slot_id]);
+      await client.query('UPDATE slots SET is_available = TRUE WHERE id = $1', [reservation.slot_id]);
     if (status !== 'cancelled' && reservation.status === 'cancelled')
-      await pool.query('UPDATE slots SET is_available = FALSE WHERE id = $1', [reservation.slot_id]);
+      await client.query('UPDATE slots SET is_available = FALSE WHERE id = $1', [reservation.slot_id]);
 
+    await client.query('COMMIT');
     res.json({ message: 'Statut mis à jour.' });
   } catch (err) {
+    await client.query('ROLLBACK');
     res.status(500).json({ message: 'Erreur serveur.' });
+  } finally {
+    client.release();
   }
 });
 
 router.patch('/:id/cancel', isAuthenticated, async (req, res) => {
+  const client = await pool.connect();
   try {
-    const { rows } = await pool.query(
-      'SELECT * FROM reservations WHERE id = $1 AND user_id = $2',
+    await client.query('BEGIN');
+
+    const { rows } = await client.query(
+      'SELECT * FROM reservations WHERE id = $1 AND user_id = $2 FOR UPDATE',
       [req.params.id, req.user.id]
     );
     const reservation = rows[0];
 
-    if (!reservation) return res.status(404).json({ message: 'Réservation introuvable.' });
-    if (reservation.status === 'cancelled')
+    if (!reservation) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ message: 'Réservation introuvable.' });
+    }
+    if (reservation.status === 'cancelled') {
+      await client.query('ROLLBACK');
       return res.status(400).json({ message: 'Cette réservation est déjà annulée.' });
+    }
 
-    await pool.query("UPDATE reservations SET status = 'cancelled' WHERE id = $1", [reservation.id]);
-    await pool.query('UPDATE slots SET is_available = TRUE WHERE id = $1', [reservation.slot_id]);
+    await client.query("UPDATE reservations SET status = 'cancelled' WHERE id = $1", [reservation.id]);
+    await client.query('UPDATE slots SET is_available = TRUE WHERE id = $1', [reservation.slot_id]);
 
+    await client.query('COMMIT');
     res.json({ message: 'Réservation annulée.' });
   } catch (err) {
+    await client.query('ROLLBACK');
     res.status(500).json({ message: 'Erreur serveur.' });
+  } finally {
+    client.release();
   }
 });
 

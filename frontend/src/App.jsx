@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -79,7 +78,7 @@ function AppContent() {
             <Route path="reservations" element={<AdminReservations />} />
           </Route>
           <Route path="/bienvenue" element={
-            <ProtectedRoute><Welcome /></ProtectedRoute>
+            <ProtectedRoute requirePhone={false}><Welcome /></ProtectedRoute>
           } />
           <Route path="/completer-profil" element={
             <ProtectedRoute requirePhone={false}><CompleteProfile /></ProtectedRoute>

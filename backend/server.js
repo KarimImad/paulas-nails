@@ -42,14 +42,14 @@ const authLimiter = rateLimit({
 });
 
 app.use(session({
-  store: new PgSession({ pool, tableName: 'session', createTableIfMissing: true }),
+  store: new PgSession({ pool, tableName: 'session' }),
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000,
   },
 }));

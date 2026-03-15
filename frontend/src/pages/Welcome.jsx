@@ -66,7 +66,7 @@ export default function Welcome() {
                   </p>
                   <p className="text-xl font-serif font-light text-cream-900">{next.service_name}</p>
                   <p className="text-sm font-sans text-cream-500 mt-1">
-                    {formatDate(next.date)} · {next.time.slice(0, 5)}
+                    {formatDate(next.slot_date)} · {next.slot_time.slice(0, 5)}
                   </p>
                 </div>
                 <div className="shrink-0 w-14 h-14 rounded-2xl bg-cream-100 flex items-center justify-center text-2xl">

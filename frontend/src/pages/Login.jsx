@@ -1,16 +1,22 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPwd, setShowPwd] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate(user.role === 'admin' ? '/admin' : '/bienvenue', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   const handleChange = e => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -22,9 +28,8 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      const user = await login(form.email, form.password);
-      addToast(`Bienvenue, ${user.name.split(' ')[0]} !`, 'success');
-      navigate(user.role === 'admin' ? '/admin' : '/bienvenue', { replace: true });
+      const u = await login(form.email, form.password);
+      addToast(`Bienvenue, ${u.name.split(' ')[0]} !`, 'success');
     } catch (err) {
       setError(err.response?.data?.message || 'Identifiants incorrects.');
     } finally {
