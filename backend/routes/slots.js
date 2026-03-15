@@ -4,7 +4,6 @@ import { isAuthenticated, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// User: available slots
 router.get('/available', isAuthenticated, async (req, res) => {
   const today = new Date().toISOString().split('T')[0];
   const { rows } = await pool.query(
@@ -14,7 +13,6 @@ router.get('/available', isAuthenticated, async (req, res) => {
   res.json(rows);
 });
 
-// Admin: all future slots with reservation info
 router.get('/', isAdmin, async (req, res) => {
   const today = new Date().toISOString().split('T')[0];
   const { rows } = await pool.query(`
@@ -29,7 +27,6 @@ router.get('/', isAdmin, async (req, res) => {
   res.json(rows);
 });
 
-// Admin: create a single slot
 router.post('/', isAdmin, async (req, res) => {
   const { date, time } = req.body;
   if (!date || !time) return res.status(400).json({ message: 'Date et heure requises.' });
@@ -47,7 +44,6 @@ router.post('/', isAdmin, async (req, res) => {
   }
 });
 
-// Admin: create multiple slots for a date
 router.post('/bulk', isAdmin, async (req, res) => {
   const { date, times } = req.body;
   if (!date || !Array.isArray(times) || times.length === 0)
@@ -65,7 +61,6 @@ router.post('/bulk', isAdmin, async (req, res) => {
   res.status(201).json({ message: `${created} créneau(x) créé(s) sur ${times.length}.` });
 });
 
-// Admin: delete a slot
 router.delete('/:id', isAdmin, async (req, res) => {
   const { id } = req.params;
   const active = await pool.query(

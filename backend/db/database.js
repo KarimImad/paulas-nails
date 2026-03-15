@@ -70,7 +70,8 @@ export async function initDB() {
   // Seed admin
   const adminRes = await pool.query('SELECT id FROM users WHERE email = $1', ['admin@paulasnails.fr']);
   if (adminRes.rows.length === 0) {
-    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin2024!';
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (!adminPassword) throw new Error('ADMIN_PASSWORD must be set in .env');
     const hash = await bcrypt.hash(adminPassword, 12);
     await pool.query(
       'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4)',

@@ -85,6 +85,46 @@ router.get('/google/callback',
   }
 );
 
+router.delete('/account', async (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ message: 'Non authentifié.' });
+  if (req.user.role === 'admin') return res.status(403).json({ message: 'Impossible de supprimer le compte admin.' });
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Libérer les créneaux des réservations actives
+    await client.query(`
+      UPDATE slots SET is_available = TRUE
+      WHERE id IN (
+        SELECT slot_id FROM reservations
+        WHERE user_id = $1 AND status != 'cancelled'
+      )
+    `, [req.user.id]);
+
+    // Supprimer les réservations
+    await client.query('DELETE FROM reservations WHERE user_id = $1', [req.user.id]);
+
+    // Supprimer le compte
+    await client.query('DELETE FROM users WHERE id = $1', [req.user.id]);
+
+    await client.query('COMMIT');
+
+    req.logout((err) => {
+      if (err) console.error('[delete-account] logout error:', err.message);
+      req.session.destroy(() => {
+        res.clearCookie('connect.sid');
+        res.json({ message: 'Compte et données supprimés.' });
+      });
+    });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ message: 'Erreur serveur.' });
+  } finally {
+    client.release();
+  }
+});
+
 router.patch('/profile', async (req, res) => {
   if (!req.isAuthenticated()) return res.status(401).json({ message: 'Non authentifié.' });
 

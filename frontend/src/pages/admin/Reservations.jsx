@@ -211,7 +211,7 @@ export default function AdminReservations() {
                     )}
                     {r.status === 'cancelled' && (
                       <button
-                        onClick={() => handleStatusChange(r.id, 'pending')}
+                        onClick={() => handleStatusChange(r.id, 'confirmed')}
                         disabled={updating === r.id}
                         className="p-1.5 rounded-lg bg-cream-50 text-cream-500 hover:bg-cream-100 transition-colors text-xs font-sans"
                         title="Rétablir"

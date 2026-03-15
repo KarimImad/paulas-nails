@@ -33,8 +33,13 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const deleteAccount = async () => {
+    await axios.delete('/api/auth/account');
+    setUser(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login, register, logout, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,8 +1,17 @@
 import express from 'express';
 import pool from '../db/database.js';
 import { isAuthenticated, isAdmin } from '../middleware/auth.js';
+import {
+  sendReservationConfirmation,
+  sendReservationCancellation,
+  sendAdminNewReservation,
+} from '../services/mailer.js';
 
 const router = express.Router();
+
+// ---------------------------------------------------------------------------
+// GET /my — réservations de l'utilisateur connecté
+// ---------------------------------------------------------------------------
 
 router.get('/my', isAuthenticated, async (req, res) => {
   try {
@@ -22,6 +31,10 @@ router.get('/my', isAuthenticated, async (req, res) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// GET / — toutes les réservations (admin)
+// ---------------------------------------------------------------------------
+
 router.get('/', isAdmin, async (_req, res) => {
   try {
     const { rows } = await pool.query(`
@@ -40,6 +53,10 @@ router.get('/', isAdmin, async (_req, res) => {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
 });
+
+// ---------------------------------------------------------------------------
+// POST / — créer une réservation (auto-confirmée)
+// ---------------------------------------------------------------------------
 
 router.post('/', isAuthenticated, async (req, res) => {
   const client = await pool.connect();
@@ -78,7 +95,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     }
 
     const insertRes = await client.query(
-      'INSERT INTO reservations (user_id, service_id, slot_id, notes) VALUES ($1, $2, $3, $4) RETURNING id',
+      "INSERT INTO reservations (user_id, service_id, slot_id, status, notes) VALUES ($1, $2, $3, 'confirmed', $4) RETURNING id",
       [req.user.id, service_id, slot_id, notes || null]
     );
 
@@ -87,7 +104,7 @@ router.post('/', isAuthenticated, async (req, res) => {
     await client.query('COMMIT');
 
     const { rows } = await pool.query(`
-      SELECT r.*, s.name AS service_name, s.price AS service_price,
+      SELECT r.*, s.name AS service_name, s.price AS service_price, s.duration AS service_duration,
              sl.date AS slot_date, sl.time AS slot_time
       FROM reservations r
       JOIN services s  ON r.service_id = s.id
@@ -95,7 +112,32 @@ router.post('/', isAuthenticated, async (req, res) => {
       WHERE r.id = $1
     `, [insertRes.rows[0].id]);
 
-    res.status(201).json(rows[0]);
+    const reservation = rows[0];
+    const mailData = {
+      serviceName:     reservation.service_name,
+      servicePrice:    reservation.service_price,
+      serviceDuration: reservation.service_duration,
+      slotDate:        reservation.slot_date,
+      slotTime:        reservation.slot_time,
+    };
+
+    // Mail de confirmation au client
+    sendReservationConfirmation({
+      to:       req.user.email,
+      userName: req.user.name,
+      ...mailData,
+    }).catch(err => console.error('[mailer:confirmation]', err.message));
+
+    // Notification à l'admin
+    sendAdminNewReservation({
+      clientName:  req.user.name,
+      clientEmail: req.user.email,
+      clientPhone: req.user.phone || null,
+      notes:       notes || null,
+      ...mailData,
+    }).catch(err => console.error('[mailer:admin]', err.message));
+
+    res.status(201).json(reservation);
   } catch (err) {
     await client.query('ROLLBACK');
     res.status(500).json({ message: 'Erreur serveur.' });
@@ -103,6 +145,10 @@ router.post('/', isAuthenticated, async (req, res) => {
     client.release();
   }
 });
+
+// ---------------------------------------------------------------------------
+// PATCH /:id/status — changer le statut (admin)
+// ---------------------------------------------------------------------------
 
 router.patch('/:id/status', isAdmin, async (req, res) => {
   const client = await pool.connect();
@@ -129,6 +175,33 @@ router.patch('/:id/status', isAdmin, async (req, res) => {
       await client.query('UPDATE slots SET is_available = FALSE WHERE id = $1', [reservation.slot_id]);
 
     await client.query('COMMIT');
+
+    // Mail d'annulation au client si l'admin annule
+    if (status === 'cancelled' && reservation.status !== 'cancelled') {
+      pool.query(`
+        SELECT u.name, u.email, s.name AS service_name, s.price AS service_price, s.duration AS service_duration,
+               sl.date AS slot_date, sl.time AS slot_time
+        FROM reservations r
+        JOIN users    u  ON r.user_id    = u.id
+        JOIN services s  ON r.service_id = s.id
+        JOIN slots    sl ON r.slot_id    = sl.id
+        WHERE r.id = $1
+      `, [id]).then(({ rows: rr }) => {
+        if (!rr[0]) return;
+        const r = rr[0];
+        sendReservationCancellation({
+          to:              r.email,
+          userName:        r.name,
+          serviceName:     r.service_name,
+          servicePrice:    r.service_price,
+          serviceDuration: r.service_duration,
+          slotDate:        r.slot_date,
+          slotTime:        r.slot_time,
+          cancelledByAdmin: true,
+        }).catch(err => console.error('[mailer:cancel-admin]', err.message));
+      }).catch(() => {});
+    }
+
     res.json({ message: 'Statut mis à jour.' });
   } catch (err) {
     await client.query('ROLLBACK');
@@ -137,6 +210,10 @@ router.patch('/:id/status', isAdmin, async (req, res) => {
     client.release();
   }
 });
+
+// ---------------------------------------------------------------------------
+// PATCH /:id/cancel — annulation par le client
+// ---------------------------------------------------------------------------
 
 router.patch('/:id/cancel', isAuthenticated, async (req, res) => {
   const client = await pool.connect();
@@ -162,6 +239,30 @@ router.patch('/:id/cancel', isAuthenticated, async (req, res) => {
     await client.query('UPDATE slots SET is_available = TRUE WHERE id = $1', [reservation.slot_id]);
 
     await client.query('COMMIT');
+
+    // Mail d'annulation au client
+    pool.query(`
+      SELECT s.name AS service_name, s.price AS service_price, s.duration AS service_duration,
+             sl.date AS slot_date, sl.time AS slot_time
+      FROM reservations r
+      JOIN services s ON r.service_id = s.id
+      JOIN slots   sl ON r.slot_id    = sl.id
+      WHERE r.id = $1
+    `, [reservation.id]).then(({ rows: rr }) => {
+      if (!rr[0]) return;
+      const r = rr[0];
+      sendReservationCancellation({
+        to:              req.user.email,
+        userName:        req.user.name,
+        serviceName:     r.service_name,
+        servicePrice:    r.service_price,
+        serviceDuration: r.service_duration,
+        slotDate:        r.slot_date,
+        slotTime:        r.slot_time,
+        cancelledByAdmin: false,
+      }).catch(err => console.error('[mailer:cancel-user]', err.message));
+    }).catch(() => {});
+
     res.json({ message: 'Réservation annulée.' });
   } catch (err) {
     await client.query('ROLLBACK');

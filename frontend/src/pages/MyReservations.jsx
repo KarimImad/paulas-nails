@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 
 function formatDate(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
@@ -25,9 +26,24 @@ function isPast(dateStr, timeStr) {
 
 export default function MyReservations() {
   const { addToast } = useToast();
+  const { deleteAccount } = useAuth();
+  const navigate = useNavigate();
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('Supprimer définitivement votre compte et toutes vos données ? Cette action est irréversible.')) return;
+    setDeleting(true);
+    try {
+      await deleteAccount();
+      navigate('/', { replace: true });
+    } catch {
+      addToast('Erreur lors de la suppression du compte.', 'error');
+      setDeleting(false);
+    }
+  };
 
   const fetchReservations = async () => {
     setLoading(true);
@@ -166,6 +182,18 @@ export default function MyReservations() {
             )}
           </div>
         )}
+        {/* RGPD — droit à l'effacement */}
+        <div className="mt-16 pt-8 border-t border-cream-100 text-center">
+          <p className="text-xs text-cream-300 font-sans mb-3">Conformément au RGPD, vous pouvez supprimer votre compte et toutes vos données personnelles.</p>
+          <button
+            onClick={handleDeleteAccount}
+            disabled={deleting}
+            className="text-xs text-cream-300 font-sans hover:text-red-400 transition-colors underline underline-offset-2"
+          >
+            {deleting ? 'Suppression…' : 'Supprimer mon compte et mes données'}
+          </button>
+        </div>
+
       </div>
     </div>
   );

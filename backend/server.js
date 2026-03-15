@@ -129,6 +129,7 @@ app.use('/api/services', servicesRouter);
 app.use('/api/slots', slotsRouter);
 app.use('/api/reservations', reservationsRouter);
 
+
 app.use((err, _req, res, _next) => {
   const status = err.status || 500;
   const message = process.env.NODE_ENV === 'production' ? 'Erreur serveur.' : err.message;
