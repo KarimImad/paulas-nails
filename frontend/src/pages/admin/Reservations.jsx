@@ -20,7 +20,6 @@ function StatusBadge({ status }) {
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Tous les statuts' },
-  { value: 'pending', label: 'En attente' },
   { value: 'confirmed', label: 'Confirmé' },
   { value: 'cancelled', label: 'Annulé' },
 ];
@@ -67,7 +66,6 @@ export default function AdminReservations() {
 
   const counts = {
     total: reservations.length,
-    pending: reservations.filter(r => r.status === 'pending').length,
     confirmed: reservations.filter(r => r.status === 'confirmed').length,
     cancelled: reservations.filter(r => r.status === 'cancelled').length,
   };
@@ -79,9 +77,8 @@ export default function AdminReservations() {
         <p className="text-sm text-cream-400 font-sans mt-1">{counts.total} réservation(s) au total</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         {[
-          { label: 'En attente', count: counts.pending, cls: 'badge-pending' },
           { label: 'Confirmées', count: counts.confirmed, cls: 'badge-confirmed' },
           { label: 'Annulées', count: counts.cancelled, cls: 'badge-cancelled' },
         ].map(({ label, count, cls }) => (
@@ -173,30 +170,6 @@ export default function AdminReservations() {
                   </div>
 
                   <div className="col-span-1 flex items-center gap-1">
-                    {r.status === 'pending' && (
-                      <>
-                        <button
-                          onClick={() => handleStatusChange(r.id, 'confirmed')}
-                          disabled={updating === r.id}
-                          className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                          title="Confirmer"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleStatusChange(r.id, 'cancelled')}
-                          disabled={updating === r.id}
-                          className="p-1.5 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 transition-colors"
-                          title="Annuler"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </>
-                    )}
                     {r.status === 'confirmed' && (
                       <button
                         onClick={() => handleStatusChange(r.id, 'cancelled')}

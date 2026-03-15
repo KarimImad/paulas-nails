@@ -126,14 +126,12 @@ export default function AdminLayout() {
         <SidebarContent />
       </aside>
 
-      {sidebarOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div className="w-60 bg-cream-900 flex flex-col">
-            <SidebarContent />
-          </div>
-          <div className="flex-1 bg-black/40" onClick={() => setSidebarOpen(false)} />
+      <div className={`lg:hidden fixed inset-0 z-50 flex transition-opacity duration-300 ${sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <div className={`w-60 bg-cream-900 flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <SidebarContent />
         </div>
-      )}
+        <div className="flex-1 bg-black/40" onClick={() => setSidebarOpen(false)} />
+      </div>
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <header className="bg-white border-b border-cream-100 px-6 py-4 flex items-center justify-between shrink-0">

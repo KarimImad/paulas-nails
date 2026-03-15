@@ -99,7 +99,10 @@ export default function Home() {
               <br />
               <em className="not-italic text-cream-600">sublimer</em>
               <br />
-              vos ongles
+              <span className="inline-flex items-center gap-4">
+                vos ongles
+                <span className="lg:hidden text-5xl md:text-6xl select-none" style={{ filter: 'drop-shadow(0 2px 8px rgba(139,100,64,0.2))' }}>💅</span>
+              </span>
             </h1>
 
             <p className="text-cream-500 text-lg font-sans font-light leading-relaxed mb-10 max-w-md">

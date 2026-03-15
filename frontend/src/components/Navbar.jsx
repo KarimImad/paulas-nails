@@ -100,25 +100,29 @@ export default function Navbar() {
 
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden p-2 text-cream-600 hover:text-cream-900 transition-colors"
+          className="md:hidden p-2 text-cream-600 hover:text-cream-900 transition-colors relative w-9 h-9 flex items-center justify-center"
           aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
           aria-expanded={menuOpen}
           aria-controls="mobile-menu"
         >
-          {menuOpen ? (
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
+          <svg className={`w-5 h-5 absolute transition-all duration-300 ${menuOpen ? 'opacity-0 rotate-90 scale-75' : 'opacity-100 rotate-0 scale-100'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg className={`w-5 h-5 absolute transition-all duration-300 ${menuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
       </div>
 
-      {menuOpen && (
-        <div id="mobile-menu" className="md:hidden bg-white border-t border-cream-100 px-6 py-4 flex flex-col gap-4 shadow-card" role="navigation" aria-label="Menu mobile">
+      <div
+        id="mobile-menu"
+        role="navigation"
+        aria-label="Menu mobile"
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="bg-white border-t border-cream-100 px-6 py-4 flex flex-col gap-4 shadow-card">
           {navLinks.map(link => (
             <Link
               key={link.to}
@@ -144,7 +148,7 @@ export default function Navbar() {
             )}
           </div>
         </div>
-      )}
+      </div>
     </header>
     </>
   );

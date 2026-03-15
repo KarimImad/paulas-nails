@@ -51,8 +51,8 @@ export default function AdminDashboard() {
 
   const today = new Date().toISOString().split('T')[0];
   const todayReservations = reservations.filter(r => r.slot_date === today && r.status !== 'cancelled');
-  const pendingCount = reservations.filter(r => r.status === 'pending').length;
   const confirmedCount = reservations.filter(r => r.status === 'confirmed').length;
+  const cancelledCount = reservations.filter(r => r.status === 'cancelled').length;
   const availableSlotsCount = slots.filter(s => s.is_available && !s.reservation_id).length;
 
   const upcoming = reservations
@@ -88,11 +88,11 @@ export default function AdminDashboard() {
           icon={<svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
         />
         <StatCard
-          label="En attente"
-          value={pendingCount}
-          sub="à confirmer"
-          color="bg-orange-50"
-          icon={<svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+          label="Annulées"
+          value={cancelledCount}
+          sub="réservations annulées"
+          color="bg-red-50"
+          icon={<svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" /></svg>}
         />
         <StatCard
           label="Confirmées"
@@ -140,9 +140,7 @@ export default function AdminDashboard() {
                       <p className="text-xs font-sans font-medium text-cream-700 capitalize">{formatDate(r.slot_date)}</p>
                       <p className="text-xs text-cream-400 font-sans">{r.slot_time?.slice(0, 5)}</p>
                     </div>
-                    <span className={`shrink-0 ${r.status === 'confirmed' ? 'badge-confirmed' : 'badge-pending'}`}>
-                      {r.status === 'confirmed' ? 'Confirmé' : 'En attente'}
-                    </span>
+                    <span className="shrink-0 badge-confirmed">Confirmé</span>
                   </div>
                 ))}
               </div>
