@@ -13,6 +13,7 @@ Application web full-stack de prise de rendez-vous pour un institut de beauté o
 | Authentification | Passport Local + Google OAuth 2.0 |
 | Base de données | PostgreSQL + `pg` (pool de connexions) |
 | Sessions | `express-session` + `connect-pg-simple` |
+| Emails | Nodemailer + Brevo (SMTP) |
 | Sécurité | Helmet, express-rate-limit, bcrypt (coût 12), Zod |
 
 ---
@@ -22,6 +23,7 @@ Application web full-stack de prise de rendez-vous pour un institut de beauté o
 - Node.js ≥ 18
 - PostgreSQL ≥ 14 (base de données créée manuellement)
 - Un projet Google Cloud avec OAuth 2.0 configuré
+- Un compte Brevo (gratuit, 300 emails/jour) pour les emails transactionnels
 
 ---
 
@@ -63,17 +65,25 @@ npm run dev
 | Variable | Description | Exemple |
 |----------|-------------|---------|
 | `PORT` | Port du serveur Express | `5001` |
-| `SESSION_SECRET` | Secret de chiffrement des sessions (min. 64 chars aléatoires) | `openssl rand -hex 64` |
+| `SESSION_SECRET` | Secret de chiffrement des sessions — générer avec `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` | — |
 | `NODE_ENV` | Environnement (`development` / `production`) | `development` |
 | `FRONTEND_URL` | URL du frontend (CORS + redirections OAuth) | `http://localhost:5173` |
 | `GOOGLE_CLIENT_ID` | Client ID Google OAuth 2.0 | `xxx.apps.googleusercontent.com` |
 | `GOOGLE_CLIENT_SECRET` | Client Secret Google OAuth 2.0 | `GOCSPX-xxx` |
-| `ADMIN_PASSWORD` | Mot de passe du compte admin initial | `MonMotDePasse!` |
+| `ADMIN_PASSWORD` | Mot de passe du compte admin initial (obligatoire) | `MonMotDePasse!` |
 | `DB_HOST` | Hôte PostgreSQL | `localhost` |
 | `DB_PORT` | Port PostgreSQL | `5432` |
 | `DB_NAME` | Nom de la base de données | `paulas_nails` |
 | `DB_USER` | Utilisateur PostgreSQL | `postgres` |
 | `DB_PASSWORD` | Mot de passe PostgreSQL | — |
+| `SMTP_HOST` | Serveur SMTP (optionnel) | `smtp-relay.brevo.com` |
+| `SMTP_PORT` | Port SMTP | `587` |
+| `SMTP_USER` | Login SMTP Brevo | `xxx@smtp-brevo.com` |
+| `SMTP_PASS` | Clé SMTP Brevo | `xsmtpsib-xxx` |
+| `SMTP_FROM` | Nom et adresse expéditeur | `Paula's Nails <noreply@…>` |
+| `ADMIN_EMAIL` | Email de réception des notifications admin | `admin@paulasnails.fr` |
+
+> Si les variables SMTP sont absentes, l'application fonctionne normalement sans envoyer d'emails.
 
 ### `frontend/.env`
 
@@ -124,10 +134,12 @@ paulas-nails/
 │   ├── middleware/
 │   │   └── auth.js            # isAuthenticated, isAdmin
 │   ├── routes/
-│   │   ├── auth.js            # /register /login /logout /me /google
+│   │   ├── auth.js            # /register /login /logout /me /google /account
 │   │   ├── services.js        # CRUD services (admin)
 │   │   ├── slots.js           # Gestion des créneaux
 │   │   └── reservations.js    # Réservations (user + admin)
+│   ├── services/
+│   │   └── mailer.js          # Templates email (confirmation, annulation, admin)
 │   ├── server.js              # Point d'entrée Express
 │   └── .env.example
 ├── frontend/
@@ -135,7 +147,7 @@ paulas-nails/
 │   │   ├── components/        # Navbar, Footer, Toast
 │   │   ├── context/           # AuthContext, ToastContext
 │   │   ├── pages/
-│   │   │   ├── admin/         # Dashboard, Services, Slots, Reservations
+│   │   │   ├── admin/         # Dashboard, Services, Slots, Reservations, TestPlan
 │   │   │   ├── Home.jsx
 │   │   │   ├── Login.jsx
 │   │   │   ├── Register.jsx
@@ -146,6 +158,7 @@ paulas-nails/
 │   │   │   └── PrivacyPolicy.jsx
 │   │   └── App.jsx
 │   └── .env.example
+├── TODO.md
 └── README.md
 ```
 
@@ -158,15 +171,34 @@ paulas-nails/
 - Connexion locale (email/mot de passe) ou via Google OAuth 2.0
 - Complétion de profil obligatoire (téléphone) après connexion Google
 - Réservation en 3 étapes : prestation → créneau → confirmation
+- Confirmation automatique à la réservation (pas de validation admin requise)
+- Email de confirmation envoyé automatiquement après chaque réservation
+- Email d'annulation envoyé au client en cas d'annulation (par lui ou par l'admin)
 - Consultation et annulation de ses rendez-vous
-- Page de bienvenue personnalisée avec prochain rendez-vous
+- Page de bienvenue personnalisée avec prochain rendez-vous à venir
+- Suppression du compte et de toutes les données personnelles (RGPD)
 
 ### Administrateur
+- Notification par email à chaque nouvelle réservation
 - Dashboard avec statistiques (réservations, taux de remplissage)
 - Gestion des prestations (CRUD)
 - Création de créneaux (unitaire ou en lot)
-- Gestion des réservations (confirmation, annulation)
+- Gestion des réservations (annuler, rétablir)
 - Plan de tests interactif (27 cas)
+
+---
+
+## Emails transactionnels
+
+Trois emails sont envoyés automatiquement via Brevo (SMTP) :
+
+| Événement | Destinataire | Contenu |
+|-----------|-------------|---------|
+| Nouvelle réservation | Client | Confirmation avec détails du RDV |
+| Annulation (client ou admin) | Client | Récapitulatif du RDV annulé |
+| Nouvelle réservation | Admin | Fiche cliente complète + détails du RDV |
+
+> Les emails sont **non-bloquants** : si l'envoi échoue, la réservation reste créée.
 
 ---
 
@@ -175,13 +207,15 @@ paulas-nails/
 - **Helmet** : headers HTTP de sécurité (CSP, X-Frame-Options, HSTS…)
 - **Rate limiting** : 10 tentatives / 15 min sur `/login` et `/register`
 - **bcrypt** (coût 12) : hachage des mots de passe
-- **Zod** : validation et sanitisation de toutes les entrées backend
+- **Zod** : validation et sanitisation des entrées sur les routes auth
+- **Transactions SQL** : `BEGIN / SELECT FOR UPDATE / COMMIT` sur toutes les mutations de réservations (protection contre les double-réservations simultanées)
 - **Requêtes paramétrées** : protection contre les injections SQL
 - **Sessions PostgreSQL** (`connect-pg-simple`) : persistance entre redémarrages
-- **Cookie** : `httpOnly`, `sameSite: strict`, `secure` en production
+- **Cookie** : `httpOnly`, `sameSite: lax`, `secure` en production
 - **CORS** : restreint à `FRONTEND_URL`
 - **Rôles** : middleware `isAuthenticated` / `isAdmin` sur toutes les routes sensibles
 - **Variables d'environnement** : aucun secret dans le code source
+- **SESSION_SECRET** : obligatoire au démarrage, aucun fallback codé en dur
 
 ---
 
@@ -192,7 +226,7 @@ paulas-nails/
 | Email | `admin@paulasnails.fr` |
 | Mot de passe | Valeur de `ADMIN_PASSWORD` dans `.env` |
 
-> Le compte admin est créé automatiquement au premier démarrage si la base est vide.
+> Le compte admin est créé automatiquement au premier démarrage si la base est vide. `ADMIN_PASSWORD` est obligatoire — le serveur refuse de démarrer sans cette variable.
 
 ---
 
@@ -219,8 +253,7 @@ paulas-nails/
               N        │ FK user_id    → users(id)            │
                        │ FK service_id → services(id)         │
                        │ FK slot_id   → slots(id)             │
-                       │    status (pending/confirmed/        │
-                       │            cancelled)                │
+                       │    status (confirmed / cancelled)    │
                        │    notes                             │
                        │    created_at                        │
                        └──────────────────┬───────────────────┘
@@ -259,3 +292,4 @@ paulas-nails/
 - Consentement explicite obligatoire à l'inscription
 - Page de politique de confidentialité complète
 - Données minimales collectées (nom, email, téléphone)
+- **Droit à l'effacement** : endpoint `DELETE /api/auth/account` — supprime les réservations, libère les créneaux et supprime le compte. Accessible depuis `/mes-reservations`.
