@@ -41,13 +41,19 @@ export default function Reservation() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      axios.get('/api/services'),
-      axios.get('/api/slots/available'),
-    ]).then(([s, sl]) => {
-      setServices(s.data);
-      setSlots(sl.data);
-    }).finally(() => setLoading(false));
+    const fetchData = async () => {
+      try {
+        const [s, sl] = await Promise.all([
+          axios.get('/api/services'),
+          axios.get('/api/slots/available'),
+        ]);
+        setServices(s.data);
+        setSlots(sl.data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   const groupedSlots = groupSlotsByDate(slots);
@@ -101,13 +107,11 @@ export default function Reservation() {
   return (
     <div className="min-h-screen pt-24 pb-16 px-4 bg-cream-50">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-12">
           <p className="text-xs font-sans font-medium uppercase tracking-widest text-cream-400 mb-3">Prise de rendez-vous</p>
           <h1 className="page-header">Réserver une prestation</h1>
         </div>
 
-        {/* Steps */}
         <div className="flex items-center justify-center mb-12 gap-0">
           {STEPS.map((label, i) => (
             <React.Fragment key={i}>
@@ -139,7 +143,6 @@ export default function Reservation() {
           ))}
         </div>
 
-        {/* Step 0: Choose service */}
         {step === 0 && (
           <div>
             <h2 className="section-title text-center mb-8">Quelle prestation souhaitez-vous ?</h2>
@@ -172,7 +175,6 @@ export default function Reservation() {
           </div>
         )}
 
-        {/* Step 1: Choose slot */}
         {step === 1 && (
           <div>
             <div className="flex items-center justify-between mb-8">
@@ -185,7 +187,6 @@ export default function Reservation() {
               </button>
             </div>
 
-            {/* Selected service recap */}
             <div className="card p-4 mb-6 flex items-center gap-4 bg-cream-50 border-cream-200">
               <div className="w-10 h-10 rounded-full bg-cream-200 flex items-center justify-center text-lg">
                 💅
@@ -204,7 +205,6 @@ export default function Reservation() {
               </div>
             ) : (
               <div className="space-y-6">
-                {/* Date selection */}
                 <div>
                   <p className="label mb-3">Sélectionnez une date</p>
                   <div className="flex flex-wrap gap-3">
@@ -229,7 +229,6 @@ export default function Reservation() {
                   </div>
                 </div>
 
-                {/* Time selection */}
                 {selectedDate && (
                   <div>
                     <p className="label mb-3">Sélectionnez une heure</p>
@@ -258,7 +257,6 @@ export default function Reservation() {
           </div>
         )}
 
-        {/* Step 2: Confirm */}
         {step === 2 && (
           <div className="max-w-lg mx-auto">
             <div className="flex items-center justify-between mb-8">

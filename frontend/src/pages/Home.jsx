@@ -68,16 +68,20 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('/api/services')
-      .then(res => setServices(res.data))
-      .finally(() => setLoading(false));
+    const fetchServices = async () => {
+      try {
+        const res = await axios.get('/api/services');
+        setServices(res.data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchServices();
   }, []);
 
   return (
     <div className="pt-16">
-      {/* Hero */}
       <section className="relative min-h-screen flex items-center bg-gradient-to-br from-cream-50 via-cream-100 to-nude-50 overflow-hidden">
-        {/* Decorative elements */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-cream-200/40 rounded-full blur-3xl" />
           <div className="absolute bottom-1/3 left-1/3 w-96 h-96 bg-nude-100/30 rounded-full blur-3xl" />
@@ -126,7 +130,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Visual */}
           <div className="hidden lg:flex justify-center">
             <div className="relative">
               <div className="w-80 h-80 bg-gradient-to-br from-cream-200 to-nude-100 rounded-3xl shadow-card flex items-center justify-center">
@@ -134,9 +137,8 @@ export default function Home() {
                   💅
                 </span>
               </div>
-              {/* Floating cards */}
               <div className="absolute -top-4 -right-6 card px-4 py-3 shadow-hover">
-                <p className="text-xs font-sans text-cream-500 mb-0.5">Prochain dispo</p>
+                <p className="text-xs font-sans text-cream-500 mb-0.5">Prochaine dispo</p>
                 <p className="text-sm font-sans font-medium text-cream-800">Demain · 10h00</p>
               </div>
               <div className="absolute -bottom-4 -left-6 card px-4 py-3 shadow-hover">
@@ -153,7 +155,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-cream-400">
           <span className="text-xs font-sans tracking-widest uppercase">Découvrir</span>
           <svg className="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,7 +163,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Services */}
       <section className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
@@ -197,7 +197,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How it works */}
       <section className="py-24 px-6 bg-cream-900">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
@@ -222,7 +221,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-24 px-6 bg-gradient-to-r from-cream-100 to-nude-50">
         <div className="max-w-2xl mx-auto text-center">
           <span className="text-4xl mb-6 block">✦</span>

@@ -29,11 +29,14 @@ export default function MyReservations() {
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(null);
 
-  const fetchReservations = () => {
+  const fetchReservations = async () => {
     setLoading(true);
-    axios.get('/api/reservations/my')
-      .then(res => setReservations(res.data))
-      .finally(() => setLoading(false));
+    try {
+      const res = await axios.get('/api/reservations/my');
+      setReservations(res.data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(fetchReservations, []);
@@ -88,7 +91,6 @@ export default function MyReservations() {
           </div>
         ) : (
           <div className="space-y-10">
-            {/* Upcoming */}
             {upcoming.length > 0 && (
               <div>
                 <h2 className="text-xs font-sans font-medium uppercase tracking-widest text-cream-400 mb-5">
@@ -132,7 +134,6 @@ export default function MyReservations() {
               </div>
             )}
 
-            {/* Past */}
             {past.length > 0 && (
               <div>
                 <h2 className="text-xs font-sans font-medium uppercase tracking-widest text-cream-400 mb-5">

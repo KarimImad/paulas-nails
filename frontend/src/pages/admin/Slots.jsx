@@ -34,15 +34,19 @@ export default function AdminSlots() {
   const [showForm, setShowForm] = useState(false);
   const [deleting, setDeleting] = useState(null);
 
-  // Form state
   const [date, setDate] = useState(getTomorrow());
   const [selectedTimes, setSelectedTimes] = useState([]);
   const [customTime, setCustomTime] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchSlots = () => {
+  const fetchSlots = async () => {
     setLoading(true);
-    axios.get('/api/slots').then(r => setSlots(r.data)).finally(() => setLoading(false));
+    try {
+      const r = await axios.get('/api/slots');
+      setSlots(r.data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(fetchSlots, []);
@@ -116,7 +120,6 @@ export default function AdminSlots() {
         </button>
       </div>
 
-      {/* Add form */}
       {showForm && (
         <div className="card p-6 mb-8 border-cream-200">
           <h2 className="font-serif text-lg text-cream-900 mb-5">Créer des créneaux</h2>
@@ -196,7 +199,6 @@ export default function AdminSlots() {
         </div>
       )}
 
-      {/* Slots list */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
           <div className="w-8 h-8 border-2 border-cream-200 border-t-cream-600 rounded-full animate-spin" />

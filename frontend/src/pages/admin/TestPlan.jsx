@@ -105,7 +105,6 @@ export default function TestPlan() {
         <p className="text-sm text-cream-500 font-sans">Cliquez sur un badge de statut pour le faire pivoter (OK → Échec → À tester)</p>
       </div>
 
-      {/* Résumé */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="card p-4 text-center">
           <p className="text-3xl font-serif font-light text-emerald-600">{okCount}</p>
@@ -121,7 +120,6 @@ export default function TestPlan() {
         </div>
       </div>
 
-      {/* Tableau par catégorie */}
       <div className="space-y-6">
         {testCases.map(cat => (
           <div key={cat.category} className="card overflow-hidden">

@@ -62,4 +62,30 @@ router.get('/me', (req, res) => {
   res.json({ user: null });
 });
 
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+router.get('/google/callback',
+  passport.authenticate('google', { failureRedirect: `${process.env.FRONTEND_URL}/connexion` }),
+  (req, res) => {
+    if (req.user.role === 'admin') return res.redirect(`${process.env.FRONTEND_URL}/admin`);
+    if (!req.user.phone) return res.redirect(`${process.env.FRONTEND_URL}/completer-profil`);
+    res.redirect(`${process.env.FRONTEND_URL}/`);
+  }
+);
+
+router.patch('/profile', async (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ message: 'Non authentifié.' });
+  const { phone } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE users SET phone = $1 WHERE id = $2 RETURNING id, name, email, role, phone',
+      [phone || null, req.user.id]
+    );
+    req.user.phone = result.rows[0].phone;
+    res.json({ user: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 export default router;

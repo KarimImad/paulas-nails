@@ -17,9 +17,10 @@ export async function initDB() {
       id         SERIAL PRIMARY KEY,
       name       TEXT NOT NULL,
       email      TEXT UNIQUE NOT NULL,
-      password   TEXT NOT NULL,
+      password   TEXT,
       role       TEXT DEFAULT 'user',
       phone      TEXT,
+      google_id  TEXT UNIQUE,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -52,6 +53,9 @@ export async function initDB() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
   `);
+
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT UNIQUE`);
+  await pool.query(`ALTER TABLE users ALTER COLUMN password DROP NOT NULL`);
 
   // Seed admin
   const adminRes = await pool.query('SELECT id FROM users WHERE email = $1', ['admin@paulasnails.fr']);

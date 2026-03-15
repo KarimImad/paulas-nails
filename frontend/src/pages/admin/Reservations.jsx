@@ -33,9 +33,14 @@ export default function AdminReservations() {
   const [filterSearch, setFilterSearch] = useState('');
   const [updating, setUpdating] = useState(null);
 
-  const fetchReservations = () => {
+  const fetchReservations = async () => {
     setLoading(true);
-    axios.get('/api/reservations').then(r => setReservations(r.data)).finally(() => setLoading(false));
+    try {
+      const r = await axios.get('/api/reservations');
+      setReservations(r.data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(fetchReservations, []);
@@ -74,7 +79,6 @@ export default function AdminReservations() {
         <p className="text-sm text-cream-400 font-sans mt-1">{counts.total} réservation(s) au total</p>
       </div>
 
-      {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {[
           { label: 'En attente', count: counts.pending, cls: 'badge-pending' },
@@ -88,7 +92,6 @@ export default function AdminReservations() {
         ))}
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,7 +114,6 @@ export default function AdminReservations() {
         </select>
       </div>
 
-      {/* Table */}
       {loading ? (
         <div className="card overflow-hidden">
           {[...Array(5)].map((_, i) => (
@@ -128,7 +130,6 @@ export default function AdminReservations() {
         </div>
       ) : (
         <div className="card overflow-hidden">
-          {/* Header */}
           <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-3 bg-cream-50 border-b border-cream-100 text-xs font-sans font-medium uppercase tracking-wider text-cream-400">
             <div className="col-span-3">Cliente</div>
             <div className="col-span-3">Prestation</div>
@@ -142,31 +143,26 @@ export default function AdminReservations() {
             {filtered.map(r => (
               <div key={r.id} className="px-6 py-4 hover:bg-cream-50/50 transition-colors">
                 <div className="lg:grid lg:grid-cols-12 lg:gap-4 lg:items-center flex flex-col gap-3">
-                  {/* Client */}
                   <div className="col-span-3">
                     <p className="text-sm font-sans font-medium text-cream-800">{r.user_name}</p>
                     <p className="text-xs text-cream-400 font-sans truncate">{r.user_email}</p>
                     {r.user_phone && <p className="text-xs text-cream-400 font-sans">{r.user_phone}</p>}
                   </div>
 
-                  {/* Service */}
                   <div className="col-span-3">
                     <p className="text-sm font-sans text-cream-700">{r.service_name}</p>
                     <p className="text-xs text-cream-400 font-sans">{r.service_duration} min</p>
                   </div>
 
-                  {/* Slot */}
                   <div className="col-span-2">
                     <p className="text-sm font-sans text-cream-700 capitalize">{formatDate(r.slot_date)}</p>
                     <p className="text-xs text-cream-400 font-sans">{r.slot_time?.slice(0, 5)}</p>
                   </div>
 
-                  {/* Price */}
                   <div className="col-span-1">
                     <p className="text-sm font-sans font-medium text-cream-700">{r.service_price}€</p>
                   </div>
 
-                  {/* Status */}
                   <div className="col-span-2">
                     <StatusBadge status={r.status} />
                     {r.notes && (
@@ -176,7 +172,6 @@ export default function AdminReservations() {
                     )}
                   </div>
 
-                  {/* Actions */}
                   <div className="col-span-1 flex items-center gap-1">
                     {r.status === 'pending' && (
                       <>

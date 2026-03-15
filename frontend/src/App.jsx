@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 import Navbar from './components/Navbar';
@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import Reservation from './pages/Reservation';
 import MyReservations from './pages/MyReservations';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import CompleteProfile from './pages/CompleteProfile';
 
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/Dashboard';
@@ -21,10 +22,11 @@ import AdminSlots from './pages/admin/Slots';
 import AdminReservations from './pages/admin/Reservations';
 import TestPlan from './pages/admin/TestPlan';
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children, requirePhone = true }) {
   const { user, loading } = useAuth();
   if (loading) return <PageLoader />;
   if (!user) return <Navigate to="/connexion" replace />;
+  if (requirePhone && !user.phone) return <Navigate to="/completer-profil" replace />;
   return children;
 }
 
@@ -48,14 +50,14 @@ function PageLoader() {
 }
 
 function AppContent() {
-  const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
     <div className="min-h-screen flex flex-col">
       <Toast />
-      {!isAdmin && <Navbar />}
-      <main id="main-content" className={isAdmin ? '' : 'flex-1'}>
+      {!isAdminRoute && <Navbar />}
+      <main id="main-content" className={isAdminRoute ? '' : 'flex-1'}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/connexion" element={<Login />} />
@@ -75,11 +77,14 @@ function AppContent() {
             <Route path="tests" element={<TestPlan />} />
             <Route path="reservations" element={<AdminReservations />} />
           </Route>
+          <Route path="/completer-profil" element={
+            <ProtectedRoute requirePhone={false}><CompleteProfile /></ProtectedRoute>
+          } />
           <Route path="/politique-confidentialite" element={<PrivacyPolicy />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      {!isAdmin && <Footer />}
+      {!isAdminRoute && <Footer />}
     </div>
   );
 }

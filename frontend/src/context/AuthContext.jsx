@@ -10,10 +10,17 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('/api/auth/me')
-      .then(res => setUser(res.data.user))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+    const fetchMe = async () => {
+      try {
+        const res = await axios.get('/api/auth/me');
+        setUser(res.data.user);
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMe();
   }, []);
 
   const login = async (email, password) => {
@@ -34,7 +41,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

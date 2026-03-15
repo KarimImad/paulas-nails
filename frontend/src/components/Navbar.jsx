@@ -25,17 +25,16 @@ export default function Navbar() {
     navigate('/');
   };
 
-  const navLinks = user ? [
+  const navLinks = [
     { to: '/', label: 'Accueil' },
-    { to: '/reservation', label: 'Réserver' },
-    { to: '/mes-reservations', label: 'Mes rendez-vous' },
-  ] : [
-    { to: '/', label: 'Accueil' },
+    ...(user?.phone ? [
+      { to: '/reservation', label: 'Réserver' },
+      { to: '/mes-reservations', label: 'Mes rendez-vous' },
+    ] : []),
   ];
 
   return (
     <>
-      {/* Lien d'évitement RGAA */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-cream-900 focus:text-cream-100 focus:rounded-lg focus:text-sm focus:font-sans focus:outline-none"
@@ -46,7 +45,6 @@ export default function Navbar() {
       scrolled ? 'bg-white/95 backdrop-blur-md shadow-soft border-b border-cream-100' : 'bg-transparent'
     }`}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
           <span className="text-2xl">✦</span>
           <span className="font-serif text-xl font-light tracking-widest text-cream-800 group-hover:text-cream-900 transition-colors">
@@ -54,7 +52,6 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8" aria-label="Navigation principale">
           {navLinks.map(link => (
             <Link
@@ -71,7 +68,6 @@ export default function Navbar() {
           ))}
         </nav>
 
-        {/* Actions */}
         <div className="hidden md:flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3">
@@ -90,7 +86,6 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile quick action */}
         <div className="md:hidden flex items-center gap-2">
           {user ? (
             <button onClick={handleLogout} className="btn-secondary text-xs py-1.5 px-3">
@@ -103,7 +98,6 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile toggle */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden p-2 text-cream-600 hover:text-cream-900 transition-colors"
@@ -123,7 +117,6 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile menu */}
       {menuOpen && (
         <div id="mobile-menu" className="md:hidden bg-white border-t border-cream-100 px-6 py-4 flex flex-col gap-4 shadow-card" role="navigation" aria-label="Menu mobile">
           {navLinks.map(link => (

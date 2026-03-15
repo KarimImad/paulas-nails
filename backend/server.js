@@ -3,6 +3,7 @@ import express from 'express';
 import session from 'express-session';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
 import memoryStoreFactory from 'memorystore';
@@ -53,6 +54,41 @@ passport.use(new LocalStrategy(
       if (!valid) return done(null, false, { message: 'Email ou mot de passe incorrect.' });
       const { password: _, ...safe } = user;
       return done(null, safe);
+    } catch (err) {
+      return done(err);
+    }
+  }
+));
+
+passport.use(new GoogleStrategy(
+  {
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: '/api/auth/google/callback',
+  },
+  async (_accessToken, _refreshToken, profile, done) => {
+    try {
+      const email = profile.emails[0].value;
+      const existing = await pool.query(
+        'SELECT id, name, email, role, phone FROM users WHERE google_id = $1',
+        [profile.id]
+      );
+      if (existing.rows.length > 0) return done(null, existing.rows[0]);
+
+      const byEmail = await pool.query(
+        'SELECT id, name, email, role, phone FROM users WHERE email = $1',
+        [email]
+      );
+      if (byEmail.rows.length > 0) {
+        await pool.query('UPDATE users SET google_id = $1 WHERE id = $2', [profile.id, byEmail.rows[0].id]);
+        return done(null, byEmail.rows[0]);
+      }
+
+      const result = await pool.query(
+        'INSERT INTO users (name, email, google_id) VALUES ($1, $2, $3) RETURNING id, name, email, role, phone',
+        [profile.displayName, email, profile.id]
+      );
+      return done(null, result.rows[0]);
     } catch (err) {
       return done(err);
     }

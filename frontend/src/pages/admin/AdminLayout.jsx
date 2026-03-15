@@ -66,7 +66,6 @@ export default function AdminLayout() {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
-      {/* Logo */}
       <div className="px-6 py-7 border-b border-cream-800">
         <div className="flex items-center gap-2.5">
           <span className="text-cream-400 text-xl">✦</span>
@@ -77,7 +76,6 @@ export default function AdminLayout() {
         </div>
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 px-3 py-6 space-y-1">
         {navItems.map(item => (
           <NavLink
@@ -99,7 +97,6 @@ export default function AdminLayout() {
         ))}
       </nav>
 
-      {/* User */}
       <div className="px-4 py-5 border-t border-cream-800">
         <div className="flex items-center gap-3 mb-4 px-2">
           <div className="w-8 h-8 rounded-full bg-cream-700 flex items-center justify-center text-sm font-serif text-cream-200">
@@ -125,12 +122,10 @@ export default function AdminLayout() {
 
   return (
     <div className="flex h-screen min-h-screen bg-cream-50 overflow-hidden">
-      {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-60 bg-cream-900 shrink-0">
         <SidebarContent />
       </aside>
 
-      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div className="w-60 bg-cream-900 flex flex-col">
@@ -140,9 +135,7 @@ export default function AdminLayout() {
         </div>
       )}
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top bar */}
         <header className="bg-white border-b border-cream-100 px-6 py-4 flex items-center justify-between shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -165,7 +158,6 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        {/* Page content */}
         <main className="flex-1 overflow-y-auto bg-cream-50">
           <Outlet />
         </main>

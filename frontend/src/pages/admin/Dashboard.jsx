@@ -32,15 +32,21 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      axios.get('/api/reservations'),
-      axios.get('/api/services'),
-      axios.get('/api/slots'),
-    ]).then(([r, s, sl]) => {
-      setReservations(r.data);
-      setServices(s.data);
-      setSlots(sl.data);
-    }).finally(() => setLoading(false));
+    const fetchData = async () => {
+      try {
+        const [r, s, sl] = await Promise.all([
+          axios.get('/api/reservations'),
+          axios.get('/api/services'),
+          axios.get('/api/slots'),
+        ]);
+        setReservations(r.data);
+        setServices(s.data);
+        setSlots(sl.data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   const today = new Date().toISOString().split('T')[0];
@@ -64,7 +70,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-6 lg:p-8">
-      {/* Welcome */}
       <div className="mb-8">
         <h1 className="text-2xl font-serif font-light text-cream-900">
           Bonjour, {user?.name?.split(' ')[0]} ✦
@@ -74,7 +79,6 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
           label="Aujourd'hui"
@@ -107,7 +111,6 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Upcoming reservations */}
         <div className="lg:col-span-2">
           <div className="card overflow-hidden">
             <div className="px-6 py-4 border-b border-cream-50 flex items-center justify-between">
@@ -147,7 +150,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Quick actions */}
         <div className="space-y-4">
           <div className="card p-5">
             <h2 className="font-sans font-medium text-cream-800 text-sm mb-4">Actions rapides</h2>
@@ -179,7 +181,6 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Services count */}
           <div className="card p-5">
             <h2 className="font-sans font-medium text-cream-800 text-sm mb-3">Catalogue</h2>
             <p className="text-3xl font-serif text-cream-900 mb-1">{services.length}</p>

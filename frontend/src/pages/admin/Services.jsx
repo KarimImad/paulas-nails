@@ -101,9 +101,14 @@ export default function AdminServices() {
   const [modal, setModal] = useState(null); // null | 'new' | service object
   const [deleting, setDeleting] = useState(null);
 
-  const fetchServices = () => {
+  const fetchServices = async () => {
     setLoading(true);
-    axios.get('/api/services').then(r => setServices(r.data)).finally(() => setLoading(false));
+    try {
+      const r = await axios.get('/api/services');
+      setServices(r.data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(fetchServices, []);
