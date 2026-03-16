@@ -3,6 +3,7 @@ import passport from 'passport';
 import bcrypt from 'bcrypt';
 import { z } from 'zod';
 import pool from '../db/database.js';
+import { isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -138,6 +139,15 @@ router.patch('/profile', async (req, res) => {
     );
     req.user.phone = result.rows[0].phone;
     res.json({ user: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
+router.get('/users/count', isAdmin, async (_req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT COUNT(*) FROM users WHERE role = 'user'");
+    res.json({ count: parseInt(rows[0].count, 10) });
   } catch (err) {
     res.status(500).json({ message: 'Erreur serveur.' });
   }
