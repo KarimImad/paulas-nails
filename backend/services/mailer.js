@@ -313,3 +313,68 @@ export async function sendAdminNewReservation({
     html:    layout(`Nouvelle réservation — Paula's Nails`, content),
   });
 }
+
+// ---------------------------------------------------------------------------
+// 4. NOTIFICATION ADMIN — annulation par la cliente
+// ---------------------------------------------------------------------------
+
+export async function sendAdminCancellationNotification({
+  clientName, clientEmail, clientPhone,
+  serviceName, servicePrice, serviceDuration,
+  slotDate, slotTime,
+}) {
+  if (!isConfigured()) return;
+
+  const adminEmail = getAdminEmail();
+  if (!adminEmail) return;
+
+  const content = `
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="background:${C.headerBg};padding:36px 44px 32px;border-bottom:1px solid ${C.border};">
+          <p style="margin:0 0 10px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:${C.accent};font-family:Arial,sans-serif;font-weight:500;">
+            ✦ &nbsp;Annulation
+          </p>
+          <h1 style="margin:0;font-size:26px;font-weight:300;color:${C.heading};font-family:Georgia,serif;line-height:1.3;">
+            ${clientName} a annulé son rendez-vous
+          </h1>
+          <p style="margin:12px 0 0;font-size:15px;color:${C.body};font-family:Arial,sans-serif;font-weight:300;line-height:1.6;">
+            Le créneau est à nouveau disponible à la réservation.
+          </p>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:8px 44px 0;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            ${detailRow('Prestation', serviceName, `${serviceDuration}&nbsp;min &nbsp;·&nbsp; ${servicePrice}&nbsp;€`)}
+            ${detailRow('Date &amp; heure', formatDate(slotDate), `à ${slotTime.slice(0, 5)}`)}
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding:0 44px 36px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="background:${C.headerBg};border-radius:12px;padding:20px 24px;border:1px solid ${C.border};">
+                <p style="margin:0 0 12px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:${C.label};font-family:Arial,sans-serif;font-weight:500;">
+                  Cliente
+                </p>
+                <p style="margin:0 0 4px;font-size:16px;font-weight:300;color:${C.heading};font-family:Georgia,serif;">${clientName}</p>
+                <p style="margin:0 0 2px;font-size:13px;color:${C.body};font-family:Arial,sans-serif;">${clientEmail}</p>
+                ${clientPhone ? `<p style="margin:0;font-size:13px;color:${C.body};font-family:Arial,sans-serif;">${clientPhone}</p>` : ''}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>`;
+
+  await transporter.sendMail({
+    from:    getSender(),
+    to:      adminEmail,
+    subject: `Annulation — ${clientName} · ${slotTime.slice(0, 5)} le ${formatDate(slotDate)}`,
+    html:    layout(`Annulation de réservation — Paula's Nails`, content),
+  });
+}

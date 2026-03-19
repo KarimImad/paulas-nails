@@ -122,7 +122,7 @@ passport.deserializeUser(async (id, done) => {
     );
     done(null, rows[0] || false);
   } catch (err) {
-    done(err);
+    done(err); 
   }
 });
 

@@ -4,6 +4,7 @@ import { isAuthenticated, isAdmin } from '../middleware/auth.js';
 import {
   sendReservationConfirmation,
   sendReservationCancellation,
+  sendAdminCancellationNotification,
   sendAdminNewReservation,
 } from '../services/mailer.js';
 
@@ -240,20 +241,22 @@ router.patch('/:id/cancel', isAuthenticated, async (req, res) => {
 
     await client.query('COMMIT');
 
-    // Mail d'annulation au client
+    // Mails d'annulation : cliente + admin
     pool.query(`
       SELECT s.name AS service_name, s.price AS service_price, s.duration AS service_duration,
-             sl.date AS slot_date, sl.time AS slot_time
+             sl.date AS slot_date, sl.time AS slot_time,
+             u.name AS user_name, u.email AS user_email, u.phone AS user_phone
       FROM reservations r
       JOIN services s ON r.service_id = s.id
       JOIN slots   sl ON r.slot_id    = sl.id
+      JOIN users    u ON r.user_id    = u.id
       WHERE r.id = $1
     `, [reservation.id]).then(({ rows: rr }) => {
       if (!rr[0]) return;
       const r = rr[0];
       sendReservationCancellation({
-        to:              req.user.email,
-        userName:        req.user.name,
+        to:              r.user_email,
+        userName:        r.user_name,
         serviceName:     r.service_name,
         servicePrice:    r.service_price,
         serviceDuration: r.service_duration,
@@ -261,6 +264,16 @@ router.patch('/:id/cancel', isAuthenticated, async (req, res) => {
         slotTime:        r.slot_time,
         cancelledByAdmin: false,
       }).catch(err => console.error('[mailer:cancel-user]', err.message));
+      sendAdminCancellationNotification({
+        clientName:      r.user_name,
+        clientEmail:     r.user_email,
+        clientPhone:     r.user_phone,
+        serviceName:     r.service_name,
+        servicePrice:    r.service_price,
+        serviceDuration: r.service_duration,
+        slotDate:        r.slot_date,
+        slotTime:        r.slot_time,
+      }).catch(err => console.error('[mailer:cancel-admin]', err.message));
     }).catch(() => {});
 
     res.json({ message: 'Réservation annulée.' });
