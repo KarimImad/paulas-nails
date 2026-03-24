@@ -51,7 +51,6 @@
 
 ## 🔧 À faire — Technique
 
-- [ ] **Zod sur les routes services et slots** (admin) — actuellement la validation vérifie juste que les champs ne sont pas vides, mais pas que la durée est un entier positif, que le prix est > 0, etc. Risque faible car routes admin uniquement.
 - [ ] **Rate limiting sur POST /reservations** — éviter le spam de réservations
 - [ ] **Index PostgreSQL** — améliorer les performances (users.email, reservations.user_id, slots.date)
 

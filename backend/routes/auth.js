@@ -1,7 +1,6 @@
 import express from 'express';
 import passport from 'passport';
 import bcrypt from 'bcrypt';
-import { z } from 'zod';
 import pool from '../db/database.js';
 import { isAdmin } from '../middleware/auth.js';
 
@@ -9,22 +8,14 @@ const router = express.Router();
 
 const PHONE_RE = /^[+\d\s\-().]{6,20}$/;
 
-const registerSchema = z.object({
-  name:     z.string().min(2).max(100),
-  email:    z.string().email(),
-  password: z.string().min(8).max(128),
-  phone:    z.string().check(z.regex(PHONE_RE, 'Format de numéro invalide.')),
-});
-
-const phoneSchema = z.string().check(z.regex(PHONE_RE, 'Format de numéro invalide.'));
-
 router.post('/register', async (req, res) => {
-  const parsed = registerSchema.safeParse(req.body);
-  if (!parsed.success) {
-    const message = parsed.error.issues[0]?.message || 'Données invalides.';
-    return res.status(400).json({ message });
-  }
-  const { name, email, password, phone } = parsed.data;
+  const { name, email, password, phone } = req.body;
+  if (!name || !email || !password)
+    return res.status(400).json({ message: 'Données invalides.' });
+  if (password.length < 8 || password.length > 128)
+    return res.status(400).json({ message: 'Le mot de passe doit contenir entre 8 et 128 caractères.' });
+  if (phone && !PHONE_RE.test(phone))
+    return res.status(400).json({ message: 'Format de numéro invalide.' });
 
   try {
     const existing = await pool.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase()]);
@@ -129,13 +120,14 @@ router.delete('/account', async (req, res) => {
 router.patch('/profile', async (req, res) => {
   if (!req.isAuthenticated()) return res.status(401).json({ message: 'Non authentifié.' });
 
-  const parsed = phoneSchema.safeParse(req.body.phone);
-  if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0].message });
+  const { phone } = req.body;
+  if (!phone || !PHONE_RE.test(phone))
+    return res.status(400).json({ message: 'Format de numéro invalide.' });
 
   try {
     const result = await pool.query(
       'UPDATE users SET phone = $1 WHERE id = $2 RETURNING id, name, email, role, phone',
-      [parsed.data, req.user.id]
+      [phone, req.user.id]
     );
     req.user.phone = result.rows[0].phone;
     res.json({ user: result.rows[0] });
