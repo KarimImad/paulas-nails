@@ -98,7 +98,7 @@ export async function initDB() {
     }
   }
 
-  console.log('  ✦ Base de données prête.');
+  console.log('Base de données ok.');
 }
 
 export default pool;

@@ -6,7 +6,6 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
-import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import connectPgSimple from 'connect-pg-simple';
 
@@ -25,7 +24,6 @@ const PgSession = connectPgSimple(session);
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // app.use(cors({
