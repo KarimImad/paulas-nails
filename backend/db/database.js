@@ -67,7 +67,6 @@ export async function initDB() {
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT UNIQUE`);
   await pool.query(`ALTER TABLE users ALTER COLUMN password DROP NOT NULL`);
 
-  // Seed admin
   const adminRes = await pool.query('SELECT id FROM users WHERE email = $1', ['admin@paulasnails.fr']);
   if (adminRes.rows.length === 0) {
     const adminPassword = process.env.ADMIN_PASSWORD;
@@ -79,7 +78,6 @@ export async function initDB() {
     );
   }
 
-  // Seed services
   const countRes = await pool.query('SELECT COUNT(*) AS c FROM services');
   if (parseInt(countRes.rows[0].c) === 0) {
     const services = [
