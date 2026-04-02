@@ -36,7 +36,7 @@ function formatDate(dateStr) {
   });
 }
 
-// Palette (matched to tailwind.config.js)
+// Palette de couleurs 
 const C = {
   bg:         '#FDFAF6', // cream-50
   cardBg:     '#FFFFFF',

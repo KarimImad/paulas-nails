@@ -2,12 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useToast } from '../../context/ToastContext';
 
-const DEFAULT_TIMES = [
-  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-  '12:00', '12:30', '14:00', '14:30', '15:00', '15:30',
-  '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
-];
-
 function groupByDate(slots) {
   return slots.reduce((acc, s) => {
     if (!acc[s.date]) acc[s.date] = [];
@@ -35,8 +29,7 @@ export default function AdminSlots() {
   const [deleting, setDeleting] = useState(null);
 
   const [date, setDate] = useState(getTomorrow());
-  const [selectedTimes, setSelectedTimes] = useState([]);
-  const [customTime, setCustomTime] = useState('');
+  const [time, setTime] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const fetchSlots = async () => {
@@ -51,30 +44,13 @@ export default function AdminSlots() {
 
   useEffect(() => { fetchSlots(); }, []);
 
-  const toggleTime = (t) => {
-    setSelectedTimes(prev =>
-      prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]
-    );
-  };
-
-  const addCustomTime = () => {
-    if (!customTime) return;
-    if (selectedTimes.includes(customTime)) return;
-    setSelectedTimes(prev => [...prev, customTime].sort());
-    setCustomTime('');
-  };
-
   const handleSubmit = async e => {
     e.preventDefault();
-    if (selectedTimes.length === 0) {
-      addToast('Sélectionnez au moins un créneau horaire.', 'error');
-      return;
-    }
     setSubmitting(true);
     try {
-      const res = await axios.post('/api/slots/bulk', { date, times: selectedTimes });
-      addToast(res.data.message, 'success');
-      setSelectedTimes([]);
+      await axios.post('/api/slots', { date, time });
+      addToast('Créneau créé.', 'success');
+      setTime('');
       setShowForm(false);
       fetchSlots();
     } catch (err) {
@@ -116,13 +92,13 @@ export default function AdminSlots() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Ajouter des créneaux
+          Ajouter un créneau
         </button>
       </div>
 
       {showForm && (
         <div className="card p-6 mb-8 border-cream-200">
-          <h2 className="font-serif text-lg text-cream-900 mb-5">Créer des créneaux</h2>
+          <h2 className="font-serif text-lg text-cream-900 mb-5">Créer un créneau</h2>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="label">Date</label>
@@ -137,62 +113,22 @@ export default function AdminSlots() {
             </div>
 
             <div>
-              <label className="label">Horaires prédéfinis</label>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {DEFAULT_TIMES.map(t => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => toggleTime(t)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-sans border transition-all ${
-                      selectedTimes.includes(t)
-                        ? 'bg-cream-800 border-cream-800 text-white'
-                        : 'bg-white border-cream-200 text-cream-700 hover:border-cream-400'
-                    }`}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
+              <label className="label">Heure</label>
+              <input
+                type="time"
+                value={time}
+                onChange={e => setTime(e.target.value)}
+                className="input-field max-w-xs"
+                required
+              />
             </div>
-
-            <div>
-              <label className="label">Horaire personnalisé</label>
-              <div className="flex gap-2 max-w-xs">
-                <input
-                  type="time"
-                  value={customTime}
-                  onChange={e => setCustomTime(e.target.value)}
-                  className="input-field"
-                />
-                <button type="button" onClick={addCustomTime} className="btn-secondary px-4 shrink-0">
-                  Ajouter
-                </button>
-              </div>
-            </div>
-
-            {selectedTimes.length > 0 && (
-              <div className="p-4 bg-cream-50 rounded-xl">
-                <p className="text-xs font-sans text-cream-500 mb-2">
-                  {selectedTimes.length} créneau(x) sélectionné(s) pour le {new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedTimes.sort().map(t => (
-                    <span key={t} className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-cream-200 rounded-lg text-xs font-sans text-cream-700">
-                      {t}
-                      <button type="button" onClick={() => toggleTime(t)} className="text-cream-400 hover:text-red-500 transition-colors">×</button>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
 
             <div className="flex gap-3">
-              <button type="button" onClick={() => { setShowForm(false); setSelectedTimes([]); }} className="btn-secondary">
+              <button type="button" onClick={() => { setShowForm(false); setTime(''); }} className="btn-secondary">
                 Annuler
               </button>
-              <button type="submit" disabled={submitting || selectedTimes.length === 0} className="btn-primary">
-                {submitting ? 'Création…' : `Créer ${selectedTimes.length} créneau(x)`}
+              <button type="submit" disabled={submitting} className="btn-primary">
+                {submitting ? 'Création…' : 'Créer le créneau'}
               </button>
             </div>
           </form>
@@ -208,7 +144,7 @@ export default function AdminSlots() {
           <div className="text-5xl mb-4">📅</div>
           <h3 className="text-xl font-serif text-cream-700 mb-2">Aucun créneau</h3>
           <p className="text-cream-400 font-sans text-sm mb-6">Commencez par créer des créneaux disponibles pour vos clientes.</p>
-          <button onClick={() => setShowForm(true)} className="btn-primary">Créer des créneaux</button>
+          <button onClick={() => setShowForm(true)} className="btn-primary">Créer un créneau</button>
         </div>
       ) : (
         <div className="space-y-6">

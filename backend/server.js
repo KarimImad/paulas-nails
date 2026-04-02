@@ -26,15 +26,15 @@ const PORT = process.env.PORT || 5001;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+   credentials: true,
+ }));
+
 // app.use(cors({
-//   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+//   origin: process.env.FRONTEND_URL.split(',').map(url => url.trim()),
 //   credentials: true,
 // }));
-
-app.use(cors({
-  origin: process.env.FRONTEND_URL.split(',').map(url => url.trim()),
-  credentials: true,
-}));
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -69,8 +69,7 @@ passport.use(new LocalStrategy(
       if (!user || !user.password) return done(null, false, { message: 'Email ou mot de passe incorrect.' });
       const valid = await bcrypt.compare(password, user.password);
       if (!valid) return done(null, false, { message: 'Email ou mot de passe incorrect.' });
-      const { password: _, ...safe } = user;
-      return done(null, safe);
+      return done(null, user);
     } catch (err) {
       return done(err);
     }

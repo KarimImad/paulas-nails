@@ -44,23 +44,6 @@ router.post('/', isAdmin, async (req, res) => {
   }
 });
 
-router.post('/bulk', isAdmin, async (req, res) => {
-  const { date, times } = req.body;
-  if (!date || !Array.isArray(times) || times.length === 0)
-    return res.status(400).json({ message: "Date et liste d'heures requises." });
-
-  let created = 0;
-  for (const time of times) {
-    const result = await pool.query(
-      'INSERT INTO slots (date, time) VALUES ($1, $2) ON CONFLICT (date, time) DO NOTHING RETURNING id',
-      [date, time]
-    );
-    if (result.rowCount > 0) created++;
-  }
-
-  res.status(201).json({ message: `${created} créneau(x) créé(s) sur ${times.length}.` });
-});
-
 router.delete('/:id', isAdmin, async (req, res) => {
   const { id } = req.params;
   const active = await pool.query(
