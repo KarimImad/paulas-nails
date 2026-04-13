@@ -20,7 +20,6 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminServices from './pages/admin/Services';
 import AdminSlots from './pages/admin/Slots';
 import AdminReservations from './pages/admin/Reservations';
-import TestPlan from './pages/admin/TestPlan';
 
 function ProtectedRoute({ children, requirePhone = true }) {
   const { user, loading } = useAuth();
@@ -74,7 +73,7 @@ function AppContent() {
             <Route index element={<AdminDashboard />} />
             <Route path="services" element={<AdminServices />} />
             <Route path="creneaux" element={<AdminSlots />} />
-            <Route path="tests" element={<TestPlan />} />
+
             <Route path="reservations" element={<AdminReservations />} />
           </Route>
           <Route path="/bienvenue" element={

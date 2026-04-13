@@ -35,13 +35,13 @@ describe('POST /api/auth/register', () => {
     expect(res.body.message).toBeTruthy();
   });
 
-  it('retourne 400 si le mot de passe est trop court (< 6 caractères)', async () => {
+  it('retourne 400 si le mot de passe est trop court (< 8 caractères)', async () => {
     const res = await request(createApp())
       .post('/api/auth/register')
       .send({ name: 'Test', email: 'test@test.com', password: '123' });
 
     expect(res.status).toBe(400);
-    expect(res.body.message).toMatch(/6/);
+    expect(res.body.message).toMatch(/8/);
   });
 
   it('retourne 400 si l\'email est déjà utilisé', async () => {
