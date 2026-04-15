@@ -9,12 +9,6 @@ function formatDate(dateStr) {
   });
 } 
 
-function getHour() {
-  const h = new Date().getHours();
-  if (h < 12) return 'Bonjour';
-  if (h < 18) return 'Bon après-midi';
-  return 'Bonsoir';
-}
 
 export default function Welcome() {
   const { user } = useAuth();
@@ -46,7 +40,7 @@ export default function Welcome() {
 
         <div className="mb-12">
           <p className="text-xs font-sans font-medium uppercase tracking-widest text-cream-400 mb-2">
-            {getHour()}
+            Bonjour
           </p>
           <h1 className="text-5xl md:text-6xl font-serif font-light text-cream-900 leading-tight">
             {firstName}

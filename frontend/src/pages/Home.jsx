@@ -138,9 +138,7 @@ export default function Home() {
           <div className="hidden lg:flex justify-center">
             <div className="relative">
               <div className="w-80 h-80 bg-gradient-to-br from-cream-200 to-nude-100 rounded-3xl shadow-card flex items-center justify-center">
-                <span className="text-9xl select-none" style={{ filter: 'drop-shadow(0 4px 16px rgba(139,100,64,0.2))' }}>
-                  💅
-                </span>
+                <img src="/logo.png" alt="Paula's Nails" className="w-64 h-64 object-contain" />
               </div>
               <div className="absolute -top-4 -right-6 card px-4 py-3 shadow-hover">
                 <p className="text-xs font-sans text-cream-500 mb-0.5">Prochaine dispo</p>

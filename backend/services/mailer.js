@@ -72,12 +72,7 @@ function layout(title, content) {
           <!-- Logo -->
           <tr>
             <td align="center" style="padding-bottom:36px;">
-              <p style="margin:0;font-size:13px;letter-spacing:8px;text-transform:uppercase;color:${C.accent};font-family:Georgia,serif;font-weight:400;">
-                ✦ &nbsp;Paula's Nails
-              </p>
-              <p style="margin:6px 0 0;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:${C.label};font-family:Arial,sans-serif;font-weight:400;">
-                Institut de beauté ongulaire
-              </p>
+              <img src="${process.env.FRONTEND_URL}/logo.png" alt="Paula's Nails" width="140" style="display:block;margin:0 auto;" />
             </td>
           </tr>
 
@@ -95,7 +90,6 @@ function layout(title, content) {
                 Paula's Nails · Institut de beauté ongulaire<br />
                 Cet email a été envoyé automatiquement, merci de ne pas y répondre.
               </p>
-              <p style="margin:12px 0 0;font-size:13px;color:${C.accent};font-family:Georgia,serif;letter-spacing:4px;">✦</p>
             </td>
           </tr>
 
@@ -138,7 +132,7 @@ export async function sendReservationConfirmation({
       <tr>
         <td style="background:${C.headerBg};padding:36px 44px 32px;border-bottom:1px solid ${C.border};">
           <p style="margin:0 0 10px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:${C.accent};font-family:Arial,sans-serif;font-weight:500;">
-            ✦ &nbsp;Réservation confirmée
+            Réservation confirmée
           </p>
           <h1 style="margin:0;font-size:28px;font-weight:300;color:${C.heading};font-family:Georgia,serif;line-height:1.3;">
             Bonjour ${userName},
@@ -262,7 +256,7 @@ export async function sendAdminNewReservation({
       <tr>
         <td style="background:${C.headerBg};padding:36px 44px 32px;border-bottom:1px solid ${C.border};">
           <p style="margin:0 0 10px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:${C.accent};font-family:Arial,sans-serif;font-weight:500;">
-            ✦ &nbsp;Nouvelle réservation
+            Nouvelle réservation
           </p>
           <h1 style="margin:0;font-size:26px;font-weight:300;color:${C.heading};font-family:Georgia,serif;line-height:1.3;">
             ${clientName} vient de réserver
@@ -333,7 +327,7 @@ export async function sendAdminCancellationNotification({
       <tr>
         <td style="background:${C.headerBg};padding:36px 44px 32px;border-bottom:1px solid ${C.border};">
           <p style="margin:0 0 10px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:${C.accent};font-family:Arial,sans-serif;font-weight:500;">
-            ✦ &nbsp;Annulation
+            Annulation
           </p>
           <h1 style="margin:0;font-size:26px;font-weight:300;color:${C.heading};font-family:Georgia,serif;line-height:1.3;">
             ${clientName} a annulé son rendez-vous
