@@ -31,8 +31,8 @@ export default function PrivacyPolicy() {
             <p>
               Le responsable du traitement des données personnelles collectées via ce site est :<br />
               <strong className="text-cream-800">Paula's Nails</strong><br />
-              12 rue des Acacias, 75017 Paris<br />
-              contact@paulasnails.fr — +33 1 23 45 67 89
+              12 rue Vital Carles, 33000 Bordeaux <br />
+              contact@paulasnails.fr — +33 6 17 67 83 60
             </p>
           </Section>
 
