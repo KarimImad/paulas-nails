@@ -59,7 +59,6 @@ export default function AdminLayout() {
     <div className="flex flex-col h-full">
       <div className="px-6 py-7 border-b border-cream-800">
         <div className="flex items-center gap-2.5">
-          <span className="text-cream-400 text-xl">✦</span>
           <div>
             <span className="font-serif text-lg font-light tracking-widest text-cream-100">Paula's Nails</span>
             <p className="text-[10px] font-sans text-cream-600 uppercase tracking-widest mt-0.5">Administration</p>

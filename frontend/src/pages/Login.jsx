@@ -1,4 +1,6 @@
 import { Button } from './../components/Button';
+import ErrorAlert from '../components/ErrorAlert';
+import Divider from '../components/Divider';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -42,8 +44,7 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-cream-50 to-nude-50 flex items-center justify-center px-4 py-20">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <Link to="/" className="inline-flex items-center gap-2 mb-8 group">
-            <span className="text-2xl text-cream-600">✦</span>
+          <Link to="/" className="inline-flex items-center mb-8 group">
             <span className="font-serif text-xl font-light tracking-widest text-cream-700 group-hover:text-cream-900 transition-colors">
               Paula's Nails
             </span>
@@ -58,14 +59,7 @@ export default function Login() {
         </div>
 
         <div className="card p-8">
-          {error && (
-            <div className="mb-6 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 font-sans">
-              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {error}
-            </div>
-          )}
+          <ErrorAlert message={error} />
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -113,14 +107,10 @@ export default function Login() {
               </div>
             </div>
 
-         <Button   loading={loading}  />
+          <Button loading={loading} loadingText="Connexion…">Se connecter</Button>
           </form>
 
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-cream-100" />
-            <span className="text-xs text-cream-400 font-sans">ou</span>
-            <div className="flex-1 h-px bg-cream-100" />
-          </div>
+          <Divider />
 
           <a
             href={`${import.meta.env.VITE_API_URL}/api/auth/google`}

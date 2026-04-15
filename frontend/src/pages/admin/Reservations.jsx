@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useToast } from '../../context/ToastContext';
+import StatusBadge from '../../components/StatusBadge';
+import SkeletonCard from '../../components/SkeletonCard';
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
@@ -8,15 +10,6 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function StatusBadge({ status }) {
-  const map = {
-    pending:   { label: 'En attente',  cls: 'badge-pending'   },
-    confirmed: { label: 'Confirmé',    cls: 'badge-confirmed'  },
-    cancelled: { label: 'Annulé',      cls: 'badge-cancelled'  },
-  };
-  const { label, cls } = map[status] || map.pending;
-  return <span className={cls}>{label}</span>;
-}
 
 const STATUS_OPTIONS = [
   { value: '', label: 'Tous les statuts' },
@@ -112,14 +105,8 @@ export default function AdminReservations() {
       </div>
 
       {loading ? (
-        <div className="card overflow-hidden">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex gap-4 px-6 py-4 border-b border-cream-50 animate-pulse">
-              <div className="h-4 bg-cream-100 rounded-full flex-1" />
-              <div className="h-4 bg-cream-100 rounded-full w-32" />
-              <div className="h-4 bg-cream-100 rounded-full w-24" />
-            </div>
-          ))}
+        <div className="space-y-2">
+          {[...Array(5)].map((_, i) => <SkeletonCard key={i} lines={2} />)}
         </div>
       ) : filtered.length === 0 ? (
         <div className="card p-16 text-center">

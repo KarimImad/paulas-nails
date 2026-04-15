@@ -31,8 +31,7 @@ export default function CompleteProfile() {
     <div className="min-h-screen bg-gradient-to-br from-cream-50 to-nude-50 flex items-center justify-center px-4 py-20">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <Link to="/" className="inline-flex items-center gap-2 mb-8 group">
-            <span className="text-2xl text-cream-600">✦</span>
+          <Link to="/" className="inline-flex items-center mb-8 group">
             <span className="font-serif text-xl font-light tracking-widest text-cream-700 group-hover:text-cream-900 transition-colors">
               Paula's Nails
             </span>

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
+import SkeletonCard from '../components/SkeletonCard';
+import SectionHeader from '../components/SectionHeader';
 
 const categoryLabels = {
   vernis: 'Vernis',
@@ -168,21 +170,11 @@ export default function Home() {
 
       <section className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-xs font-sans font-medium uppercase tracking-widest text-cream-400 mb-3">Nos prestations</p>
-            <h2 className="section-title">Un soin pour chaque envie</h2>
-          </div>
+          <SectionHeader supertitle="Nos prestations" title="Un soin pour chaque envie" />
 
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="card p-6 animate-pulse">
-                  <div className="h-4 bg-cream-100 rounded-full w-20 mb-4" />
-                  <div className="h-6 bg-cream-100 rounded-full w-3/4 mb-3" />
-                  <div className="h-4 bg-cream-100 rounded-full w-full mb-2" />
-                  <div className="h-4 bg-cream-100 rounded-full w-2/3" />
-                </div>
-              ))}
+              {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -226,7 +218,6 @@ export default function Home() {
 
       <section className="py-24 px-6 bg-gradient-to-r from-cream-100 to-nude-50">
         <div className="max-w-2xl mx-auto text-center">
-          <span className="text-4xl mb-6 block">✦</span>
           <h2 className="text-4xl md:text-5xl font-serif font-light text-cream-900 mb-6">
             Prêt·e à prendre soin de vous ?
           </h2>

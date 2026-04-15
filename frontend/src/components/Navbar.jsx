@@ -45,8 +45,7 @@ export default function Navbar() {
       scrolled ? 'bg-white/95 backdrop-blur-md shadow-soft border-b border-cream-100' : 'bg-transparent'
     }`}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <span className="text-2xl">✦</span>
+        <Link to="/" className="flex items-center group">
           <span className="font-serif text-xl font-light tracking-widest text-cream-800 group-hover:text-cream-900 transition-colors">
             Paula's Nails
           </span>

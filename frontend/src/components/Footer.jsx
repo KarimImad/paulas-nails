@@ -8,7 +8,6 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-cream-400 text-xl">✦</span>
               <span className="font-serif text-lg font-light tracking-widest text-cream-100">Paula's Nails</span>
             </div>
             <p className="text-sm leading-relaxed text-cream-400">
@@ -54,7 +53,7 @@ export default function Footer() {
             <Link to="/politique-confidentialite" className="text-xs text-cream-700 hover:text-cream-400 font-sans transition-colors">
               Politique de confidentialité
             </Link>
-            <span className="text-xs text-cream-700 font-sans">Fait avec soin ✦</span>
+            <span className="text-xs text-cream-700 font-sans">Fait avec soin</span>
           </div>
         </div>
       </div>

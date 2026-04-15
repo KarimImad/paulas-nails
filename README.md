@@ -1,6 +1,6 @@
 # Paula's Nails — Application de réservation en ligne
 
-Application web full-stack de prise de rendez-vous pour un institut de beauté ongulaire. Développée dans le cadre du titre professionnel **Concepteur Développeur d'Applications (CDA — RNCP 36490)**.
+Application web full-stack de prise de rendez-vous pour un institut de beauté ongulaire. Développée dans le cadre du titre professionnel **Concepteur Développeur d'Applications (CDA — RNCP 37873)**.
 
 ---
 

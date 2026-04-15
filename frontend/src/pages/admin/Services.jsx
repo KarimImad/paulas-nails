@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useToast } from '../../context/ToastContext';
+import EmptyState from '../../components/EmptyState';
+import SkeletonCard from '../../components/SkeletonCard';
 
 const CATEGORIES = [
   { value: 'vernis', label: 'Vernis' },
@@ -154,20 +156,13 @@ export default function AdminServices() {
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="card p-6 animate-pulse">
-              <div className="h-4 bg-cream-100 rounded-full w-20 mb-4" />
-              <div className="h-5 bg-cream-100 rounded-full w-3/4 mb-3" />
-              <div className="h-4 bg-cream-100 rounded-full w-full mb-2" />
-              <div className="h-4 bg-cream-100 rounded-full w-2/3" />
-            </div>
-          ))}
+          {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
         </div>
       ) : services.length === 0 ? (
-        <div className="card p-16 text-center">
-          <p className="text-cream-400 font-sans mb-4">Aucune prestation au catalogue.</p>
-          <button onClick={() => setModal('new')} className="btn-primary">Créer une prestation</button>
-        </div>
+        <EmptyState
+          description="Aucune prestation au catalogue."
+          action={<button onClick={() => setModal('new')} className="btn-primary">Créer une prestation</button>}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {services.map(service => (

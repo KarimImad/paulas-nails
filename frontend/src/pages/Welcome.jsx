@@ -49,7 +49,7 @@ export default function Welcome() {
             {getHour()}
           </p>
           <h1 className="text-5xl md:text-6xl font-serif font-light text-cream-900 leading-tight">
-            {firstName} <span className="text-cream-500">✦</span>
+            {firstName}
           </h1>
           <p className="text-cream-400 font-sans mt-3 text-lg font-light">
             Que souhaitez-vous faire aujourd'hui ?

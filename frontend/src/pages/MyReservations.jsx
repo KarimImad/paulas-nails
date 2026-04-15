@@ -3,21 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
+import StatusBadge from '../components/StatusBadge';
+import LoadingSpinner from '../components/LoadingSpinner';
+import EmptyState from '../components/EmptyState';
 
 function formatDate(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
   return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-function StatusBadge({ status }) {
-  const map = {
-    pending:   { label: 'En attente',  cls: 'badge-pending'   },
-    confirmed: { label: 'Confirmé',    cls: 'badge-confirmed'  },
-    cancelled: { label: 'Annulé',      cls: 'badge-cancelled'  },
-  };
-  const { label, cls } = map[status] || map.pending;
-  return <span className={cls}>{label}</span>;
-}
 
 function isPast(dateStr, timeStr) {
   const dt = new Date(`${dateStr}T${timeStr}`);
@@ -74,13 +68,7 @@ export default function MyReservations() {
   const upcoming = reservations.filter(r => r.status !== 'cancelled' && !isPast(r.slot_date, r.slot_time));
   const past = reservations.filter(r => r.status === 'cancelled' || isPast(r.slot_date, r.slot_time));
 
-  if (loading) {
-    return (
-      <div className="min-h-screen pt-24 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-cream-200 border-t-cream-600 rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner fullPage />;
 
   return (
     <div className="min-h-screen pt-24 pb-16 px-4 bg-cream-50">
@@ -99,12 +87,11 @@ export default function MyReservations() {
         </div>
 
         {reservations.length === 0 ? (
-          <div className="card p-16 text-center">
-            <div className="text-6xl mb-5">✦</div>
-            <h2 className="text-2xl font-serif text-cream-700 mb-3">Aucune réservation</h2>
-            <p className="text-cream-400 font-sans mb-8">Prenez votre premier rendez-vous dès maintenant.</p>
-            <Link to="/reservation" className="btn-primary">Réserver une prestation</Link>
-          </div>
+          <EmptyState
+            title="Aucune réservation"
+            description="Prenez votre premier rendez-vous dès maintenant."
+            action={<Link to="/reservation" className="btn-primary">Réserver une prestation</Link>}
+          />
         ) : (
           <div className="space-y-10">
             {upcoming.length > 0 && (

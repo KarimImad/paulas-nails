@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { Button } from '../components/Button';
+import ErrorAlert from '../components/ErrorAlert';
+import Divider from '../components/Divider';
 
 export default function Register() {
   const { register, user, loading: authLoading } = useAuth();
@@ -68,8 +71,7 @@ export default function Register() {
     <div className="min-h-screen bg-gradient-to-br from-cream-50 to-nude-50 flex items-center justify-center px-4 py-20">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <Link to="/" className="inline-flex items-center gap-2 mb-8 group">
-            <span className="text-2xl text-cream-600">✦</span>
+          <Link to="/" className="inline-flex items-center mb-8 group">
             <span className="font-serif text-xl font-light tracking-widest text-cream-700 group-hover:text-cream-900 transition-colors">
               Paula's Nails
             </span>
@@ -84,14 +86,7 @@ export default function Register() {
         </div>
 
         <div className="card p-8">
-          {error && (
-            <div className="mb-6 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 font-sans">
-              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {error}
-            </div>
-          )}
+          <ErrorAlert message={error} />
 
           <form onSubmit={handleSubmit} className="space-y-5" aria-label="Formulaire de création de compte" noValidate>
             <div>
@@ -219,24 +214,10 @@ export default function Register() {
               </label>
             </div>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full py-3.5 mt-2">
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Création du compte…
-                </span>
-              ) : 'Créer mon compte'}
-            </button>
+            <Button loading={loading} loadingText="Création du compte…">Créer mon compte</Button>
           </form>
 
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-cream-100" />
-            <span className="text-xs text-cream-400 font-sans">ou</span>
-            <div className="flex-1 h-px bg-cream-100" />
-          </div>
+          <Divider />
 
           <a
             href={`${import.meta.env.VITE_API_URL}/api/auth/google`}

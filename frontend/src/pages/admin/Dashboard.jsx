@@ -2,21 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import StatCard from '../../components/StatCard';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import QuickActionLink from '../../components/QuickActionLink';
 
-function StatCard({ label, value, sub, color, icon }) {
-  return (
-    <div className="card p-6">
-      <div className="flex items-start justify-between mb-4">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
-          {icon}
-        </div>
-      </div>
-      <p className="text-3xl font-serif text-cream-900 mb-1">{value}</p>
-      <p className="text-sm font-sans font-medium text-cream-700">{label}</p>
-      {sub && <p className="text-xs font-sans text-cream-400 mt-1">{sub}</p>}
-    </div>
-  );
-}
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
@@ -63,19 +52,13 @@ export default function AdminDashboard() {
     .sort((a, b) => a.slot_date.localeCompare(b.slot_date) || a.slot_time.localeCompare(b.slot_time))
     .slice(0, 5);
 
-  if (loading) {
-    return (
-      <div className="p-8 flex items-center justify-center min-h-64">
-        <div className="w-8 h-8 border-2 border-cream-200 border-t-cream-600 rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="p-6 lg:p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-serif font-light text-cream-900">
-          Bonjour, {user?.name?.split(' ')[0]} ✦
+          Bonjour, {user?.name?.split(' ')[0]}
         </h1>
         <p className="text-sm text-cream-400 font-sans mt-1">
           {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
@@ -155,30 +138,21 @@ export default function AdminDashboard() {
           <div className="card p-5">
             <h2 className="font-sans font-medium text-cream-800 text-sm mb-4">Actions rapides</h2>
             <div className="space-y-2">
-              <Link to="/admin/creneaux" className="flex items-center gap-3 p-3 rounded-xl hover:bg-cream-50 transition-colors group">
-                <div className="w-8 h-8 rounded-lg bg-cream-100 flex items-center justify-center group-hover:bg-cream-200 transition-colors">
-                  <svg className="w-4 h-4 text-cream-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                  </svg>
-                </div>
-                <span className="text-sm font-sans text-cream-700">Ajouter des créneaux</span>
-              </Link>
-              <Link to="/admin/services" className="flex items-center gap-3 p-3 rounded-xl hover:bg-cream-50 transition-colors group">
-                <div className="w-8 h-8 rounded-lg bg-cream-100 flex items-center justify-center group-hover:bg-cream-200 transition-colors">
-                  <svg className="w-4 h-4 text-cream-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                </div>
-                <span className="text-sm font-sans text-cream-700">Gérer les prestations</span>
-              </Link>
-              <Link to="/admin/reservations" className="flex items-center gap-3 p-3 rounded-xl hover:bg-cream-50 transition-colors group">
-                <div className="w-8 h-8 rounded-lg bg-cream-100 flex items-center justify-center group-hover:bg-cream-200 transition-colors">
-                  <svg className="w-4 h-4 text-cream-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                </div>
-                <span className="text-sm font-sans text-cream-700">Toutes les réservations</span>
-              </Link>
+              <QuickActionLink to="/admin/creneaux" label="Ajouter des créneaux" icon={
+                <svg className="w-4 h-4 text-cream-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                </svg>
+              } />
+              <QuickActionLink to="/admin/services" label="Gérer les prestations" icon={
+                <svg className="w-4 h-4 text-cream-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              } />
+              <QuickActionLink to="/admin/reservations" label="Toutes les réservations" icon={
+                <svg className="w-4 h-4 text-cream-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              } />
             </div>
           </div>
 
